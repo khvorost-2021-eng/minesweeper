@@ -1,5 +1,10 @@
-"[Loop] House In a Forest" by HorrorPen licensed CC-BY 3.0: https://opengameart.org/content/loop-house-in-a-forest
-Sound Effect by <a href="https://pixabay.com/users/epic_stock_media-49993651/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=333826">John Scudder</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=333826">Pixabay</a>
-Sound Effect by <a href="https://pixabay.com/users/u_u4pf5h7zip-50459877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=345983">u_u4pf5h7zip</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=345983">Pixabay</a>
-Sound Effect by <a href="https://pixabay.com/users/dragon-studio-38165424/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=425459">DRAGON-STUDIO</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=425459">Pixabay</a>
-Sound Effect by <a href="https://pixabay.com/users/u_ss015dykrt-26759154/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=146260">u_ss015dykrt</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=146260">Pixabay</a>
+# Credits
+
+## Background Music
+*   **"Loop - House In a Forest"** by HorrorPen, licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). [Source](https://opengameart.org/content/loop-house-in-a-forest). No changes were made.
+
+## Sound Effects (licensed under the Pixabay Content License)
+*   **Lose Sound:** "Failure" by John Scudder (Epic_Stock_Media). [Source](https://pixabay.com/sound-effects/failure-333826/).
+*   **Flag Sound:** "Mouse Click" by u_u4pf5h7zip. [Source](https://pixabay.com/sound-effects/mouse-click-345983/).
+*   **Explosion Sound:** "Bomb Explosion" by DRAGON-STUDIO. [Source](https://pixabay.com/sound-effects/bomb-explosion-425459/).
+*   **Win Sound:** "Success Fanfare" by u_ss015dykrt. [Source](https://pixabay.com/sound-effects/success-fanfare-146260/).
