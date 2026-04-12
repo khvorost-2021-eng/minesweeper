@@ -1,13 +1,13 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+let canvas = document.getElementById('gameCanvas');
+let ctx = canvas.getContext('2d');
 const newGameBtn = document.getElementById('newGameBtn');
 let scale = 16;
 const CELL_SIZE = canvas.width/scale;
-const paragraph = document.getElementById('message');
+let paragraph = document.getElementById('message');
 const pause = document.getElementById('pauseBtn');
 const bgMusic = document.getElementById('bgMusic');
-const timerSpan = document.getElementById('timer');
-const minesCounter = document.getElementById('minesCounter');
+let timerSpan = document.getElementById('timer');
+let minesCounter = document.getElementById('minesCounter');
 const rulesBtn = document.getElementById('rulesBtn');
 const wrapper = document.getElementById('wrapper');
 let winAnimationStarted = false;
@@ -374,7 +374,7 @@ function stopTimer(){
     }
 }
 
-canvas.addEventListener('click', (e)=>{
+const canvasClickHandler = (e) => {
     if(win)return;
     if(gameOver)return;
     const rect = canvas.getBoundingClientRect();
@@ -401,8 +401,8 @@ canvas.addEventListener('click', (e)=>{
         revealCell(row, col);
     }
     draw();
-    
-})
+};
+
 let counter = mines;
 function toggleFlag(row, col){
     const tickFlag = new Audio('music/addFlag.mp3');
@@ -413,8 +413,8 @@ function toggleFlag(row, col){
     minesCounter.textContent = counter;
 }
 
-canvas.addEventListener('contextmenu', (e) => {
-    e.preventDefault(); // отключаем контекстное меню браузера
+const canvasContextMenuHandler = (e) => {
+    e.preventDefault();
     if(win)return;
     if (gameOver) return;
     
@@ -428,14 +428,15 @@ canvas.addEventListener('contextmenu', (e) => {
     const col = Math.floor(canvasX / CELL_SIZE);
     const row = Math.floor(canvasY / CELL_SIZE);
     
-    // Если ячейка уже открыта — флаг ставить нельзя
     if (revealed[row][col]) return;
     
-    // Переключаем флаг
     toggleFlag(row, col);
-    
     draw();
-});
+};
+
+canvas.addEventListener('click', canvasClickHandler);
+canvas.addEventListener('contextmenu', canvasContextMenuHandler);
+
 const url = 'https://69db4051560857310a076f65.mockapi.io/leaders';
 async function getRecord() {
     try {
@@ -508,8 +509,9 @@ newGame();
 newGameBtn.addEventListener('click', newGame);
 document.getElementById('refreshBtn').addEventListener('click', getRecord);
 
-let gameHTML = wrapper.innerHTML;
+const gameHTML = wrapper.innerHTML;
 
+// HTML для правил
 const rulesHTML = `
     <div class="rules-container">
         <h2>📋 Правила игры «Сапёр»</h2>
@@ -532,7 +534,6 @@ rulesBtn.addEventListener('click', () => {
     wrapper.classList.add('fade-out');
     
     setTimeout(() => {
-        // Меняем содержимое
         wrapper.innerHTML = rulesHTML;
         wrapper.classList.remove('fade-out');
         wrapper.classList.add('fade-in');
@@ -541,17 +542,60 @@ rulesBtn.addEventListener('click', () => {
             wrapper.classList.add('fade-out');
             
             setTimeout(() => {
+                // Восстанавливаем игру
                 wrapper.innerHTML = gameHTML;
                 wrapper.classList.remove('fade-out');
                 wrapper.classList.add('fade-in');
-                location.reload();
+                
+                // 🔥 ВАЖНО: Заново запускаем игру без перезагрузки!
+                restartGame();
             }, 300);
         });
     }, 300);
 });
 
-function musicPlay(){
-    bgMusic.play();
+function restartGame() {
+    // Заново получаем все DOM-элементы
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+    paragraph = document.getElementById('message');
+    timerSpan = document.getElementById('timer');
+    minesCounter = document.getElementById('minesCounter');
+    
+    // 🔥 ВАЖНО: Заново вешаем обработчики на canvas!
+    canvas.removeEventListener('click', canvasClickHandler);
+    canvas.removeEventListener('contextmenu', canvasContextMenuHandler);
+    canvas.addEventListener('click', canvasClickHandler);
+    canvas.addEventListener('contextmenu', canvasContextMenuHandler);
+    
+    stopTimer();
+    
+    winGlow = 0;
+    counter = mines;
+    winAnimationStarted = false;
+    gameOver = false;
+    win = false;
+    firstClick = true;
+    timerSpan.textContent = '0.00с';
+    minesCounter.textContent = mines;
+    
+    particles = [];
+    
+    initBoard();
+    initRevealed();
+    initflagged();
+    
+    paragraph.textContent = '';
+    paragraph.classList.remove('lastEffect', 'winEffect');
+    
+    draw();
 }
-
-document.addEventListener('click', musicPlay);
+// Запуск музыки при первом клике
+let musicStarted = false;
+document.addEventListener('click', () => {
+    if (!musicStarted) {
+        bgMusic.volume = 0.4;
+        bgMusic.play().catch(() => {});
+        musicStarted = true;
+    }
+}, { once: false });
