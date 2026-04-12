@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💣 Сапёр: Мировой рейтинг</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <audio id="bgMusic" loop>
+        <source src="music/bg-music.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div id="wrapper">
+        <h1>💣 Сапёр</h1>
+        
+        <div class="game-layout">
+            <div class="game-area">
+                <div class="score-panel">
+                    <span>🚩 <span id="minesCounter">40</span></span>
+                    <span>⏱️ <span id="timer">0.00</span></span>
+                </div>
+                
+                <canvas id="gameCanvas" width="480" height="480"></canvas>
+                
+                <div class="controls">
+                    <button id="newGameBtn">🔄 Новая игра</button>
+                </div>
+                
+                <p id="message"></p>
+            </div>
+            
+            <div class="leaderboard-area">
+                <div class="leaderboard-title">
+                    <span>🏆 Мировые рекорды</span>
+                </div>
+                <ul id="leaderboardList" class="leaderboard-list">
+                    <li class="empty-message">Загрузка...</li>
+                </ul>
+                <button id="refreshBtn" class="refresh-btn">🔄 Обновить</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
