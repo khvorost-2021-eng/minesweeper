@@ -8,6 +8,8 @@ const pause = document.getElementById('pauseBtn');
 const bgMusic = document.getElementById('bgMusic');
 const timerSpan = document.getElementById('timer');
 const minesCounter = document.getElementById('minesCounter');
+const rulesBtn = document.getElementById('rulesBtn');
+const wrapper = document.getElementById('wrapper');
 let winAnimationStarted = false;
 let mines = 40;
 let board = [];
@@ -391,6 +393,7 @@ canvas.addEventListener('click', (e)=>{
         firstClick = false;
         calculateAllNumbers();
         timerStarts();
+        bgMusic.play();
     }
     if (board[row][col] === 0) {
         floodFill(row, col);
@@ -500,11 +503,48 @@ function newGame() {
     draw();
 }
 
-function musicPlay(){
-    bgMusic.play();
-}
 getRecord();
 newGame();
 newGameBtn.addEventListener('click', newGame);
 document.getElementById('refreshBtn').addEventListener('click', getRecord);
-document.addEventListener('click', musicPlay);
+
+let gameHTML = wrapper.innerHTML;
+
+const rulesHTML = `
+    <div class="rules-container">
+        <h2>📋 Правила игры «Сапёр»</h2>
+        <ul>
+            <li><strong>Левый клик</strong> — открыть ячейку</li>
+            <li><strong>Правый клик</strong> — поставить/убрать флажок 🚩</li>
+            <li>Цифры показывают, сколько мин вокруг</li>
+            <li>Если открыть мину — 💥 поражение</li>
+            <li>Открыть все безопасные ячейки — 🏆 победа</li>
+            <li>Первый клик всегда безопасный</li>
+            <li>Счётчик 🚩 показывает оставшиеся мины</li>
+        </ul>
+        <p><em>Цель: открыть все ячейки без мин как можно быстрее!</em></p>
+        <button id="backToGameBtn" class="back-btn">◀ Назад к игре</button>
+    </div>
+`;
+
+rulesBtn.addEventListener('click', () => {
+    wrapper.classList.add('fade-out');
+    
+    setTimeout(() => {
+        // Меняем содержимое
+        wrapper.innerHTML = rulesHTML;
+        wrapper.classList.remove('fade-out');
+        wrapper.classList.add('fade-in');
+        
+        document.getElementById('backToGameBtn').addEventListener('click', () => {
+            wrapper.classList.add('fade-out');
+            
+            setTimeout(() => {
+                wrapper.innerHTML = gameHTML;
+                wrapper.classList.remove('fade-out');
+                wrapper.classList.add('fade-in');
+                location.reload();
+            }, 300);
+        });
+    }, 300);
+});
