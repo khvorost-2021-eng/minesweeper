@@ -10,7 +10,6 @@ const timerSpan = document.getElementById('timer');
 const minesCounter = document.getElementById('minesCounter');
 let winAnimationStarted = false;
 let mines = 40;
-bgMusic.volume = 0.5;
 let board = [];
 let firstClick = true;
 let revealed = [];
@@ -500,7 +499,12 @@ function newGame() {
     
     draw();
 }
+
+function musicPlay(){
+    bgMusic.play();
+}
 getRecord();
 newGame();
 newGameBtn.addEventListener('click', newGame);
 document.getElementById('refreshBtn').addEventListener('click', getRecord);
+document.addEventListener('click', musicPlay);
