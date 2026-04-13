@@ -2,7 +2,8 @@ let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
 const newGameBtn = document.getElementById('newGameBtn');
 let scale = 16;
-const CELL_SIZE = canvas.width/scale;
+let ro =  16;
+let CELL_SIZE;
 let paragraph = document.getElementById('message');
 const pause = document.getElementById('pauseBtn');
 const bgMusic = document.getElementById('bgMusic');
@@ -11,7 +12,7 @@ let minesCounter = document.getElementById('minesCounter');
 const rulesBtn = document.getElementById('rulesBtn');
 const wrapper = document.getElementById('wrapper');
 let winAnimationStarted = false;
-let mines = 40;
+let mines;
 let board = [];
 let firstClick = true;
 let revealed = [];
@@ -19,9 +20,66 @@ let gameOver = false;
 let flagged = [];
 let win = false;
 let winGlow = 0;
+const difficultySelect = document.getElementById('difficultySelect');
+let url;
+let timerInterval = null;
+let timerTime;
+let particles = [];
+let counter;
+
+function changeDifficulty() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    
+    const difficulty = difficultySelect.value;
+    
+    // Удаляем оба класса перед установкой нового
+    canvas.classList.remove('square', 'rectangle');
+    
+    if (difficulty === '1') {
+        scale = 9; ro = 9; mines = 10;
+        canvas.width = 300; canvas.height = 300;
+        canvas.style.width = '300px'; canvas.style.height = '300px';
+        canvas.classList.add('square');
+        url = 'https://69dcede984f912a264047274.mockapi.io/leaderseasy';
+    } else if (difficulty === '2') {
+        scale = 16; ro = 16; mines = 40;
+        canvas.width = 480; canvas.height = 480;
+        canvas.style.width = '480px'; canvas.style.height = '480px';
+        canvas.classList.add('square');
+        url = 'https://69db4051560857310a076f65.mockapi.io/leaders';
+    } else if (difficulty === '3') {
+        scale = 16; ro = 30; mines = 99;
+        canvas.width = 480; canvas.height = 900;
+        canvas.style.width = '480px'; canvas.style.height = '900px';
+        canvas.classList.add('rectangle');
+        url = 'https://69dcede984f912a264047274.mockapi.io/leadershard';
+    }
+    
+    CELL_SIZE = canvas.width / scale;
+    
+    // Сброс переменных
+    board = []; revealed = []; flagged = [];
+    firstClick = true; gameOver = false; win = false;
+    winGlow = 0; winAnimationStarted = false;
+    particles = []; counter = mines;
+    
+    minesCounter.textContent = mines;
+    timerSpan.textContent = '0.00с';
+    paragraph.textContent = '';
+    paragraph.classList.remove('lastEffect', 'winEffect');
+    
+    ctx = canvas.getContext('2d');
+    initBoard();
+    initRevealed();
+    initflagged();
+    draw();
+}
 
 function initRevealed(){
-    for (let r = 0; r < scale; r++) {
+    for (let r = 0; r < ro; r++) {
         revealed[r] = [];
         for (let c = 0; c < scale; c++) {
             revealed[r][c] = false;
@@ -30,7 +88,7 @@ function initRevealed(){
 }
 
 function initBoard(){
-    for (let r = 0; r < scale; r++) {
+    for (let r = 0; r < ro; r++) {
         board[r] = [];
         for (let c = 0; c < scale; c++) {
             board[r][c] = 0;
@@ -40,7 +98,7 @@ function initBoard(){
 function placeMines(row, col) {
     let minesPlaced = 0;
     while (minesPlaced < mines) {
-        let r = Math.floor(Math.random() * scale);
+        let r = Math.floor(Math.random() * ro);
         let c = Math.floor(Math.random() * scale);
         if([row-1, row, row+1].includes(r) && [col-1, col, col+1].includes(c)){
             continue;
@@ -64,7 +122,7 @@ function draw() {
         ctx.lineWidth = 3;
         ctx.stroke();
     }
-    for (let i = 1; i < scale; i++) {
+    for (let i = 1; i < ro; i++) {
         ctx.beginPath();
         ctx.moveTo(0, i * CELL_SIZE);
         ctx.lineTo(canvas.width, i * CELL_SIZE);
@@ -77,7 +135,7 @@ function draw() {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    for (let r = 0; r < scale; r++) {
+    for (let r = 0; r < ro; r++) {
         for (let c = 0; c < scale; c++) {
             if (revealed[r][c]) {
                 drawSquers(r, c);
@@ -126,7 +184,7 @@ function draw() {
     // Блок свечения (без вызова анимаций!)
     if (winGlow > 0) {
         const pulse = Math.sin(Date.now() * 0.02) * 0.25 + 0.65;
-        for (let r = 0; r < scale; r++) {
+        for (let r = 0; r < ro; r++) {
             for (let c = 0; c < scale; c++) {
                 if (revealed[r][c] && board[r][c] !== -1) {
                     ctx.fillStyle = `rgba(255, 215, 0, ${pulse * winGlow})`;
@@ -151,7 +209,7 @@ function draw() {
 
 function floodFill(r, c) {
     // Проверка границ
-    if (r < 0 || r >= scale || c < 0 || c >= scale) return;
+    if (r < 0 || r >= ro || c < 0 || c >= scale) return;
     
     // Уже открыта — выходим
     if (revealed[r][c]) return;
@@ -186,18 +244,18 @@ function countMinesAround(r, c) {
     
     if (r > 0 && c > 0 && board[r-1][c-1] === -1) count++;
     if (r > 0 && board[r-1][c] === -1) count++;
-    if (r > 0 && c < scale-1 && board[r-1][c+1] === -1) count++;
+    if (r > 0 && c < ro-1 && board[r-1][c+1] === -1) count++;
     if (c > 0 && board[r][c-1] === -1) count++;
     if (c < scale-1 && board[r][c+1] === -1) count++;
-    if (r < scale-1 && c > 0 && board[r+1][c-1] === -1) count++;
-    if (r < scale-1 && board[r+1][c] === -1) count++;
-    if (r < scale-1 && c < scale-1 && board[r+1][c+1] === -1) count++;
+    if (r < ro-1 && c > 0 && board[r+1][c-1] === -1) count++;
+    if (r < ro-1 && board[r+1][c] === -1) count++;
+    if (r < ro-1 && c < ro-1 && board[r+1][c+1] === -1) count++;
     
     return count;
 }
 
 function calculateAllNumbers() {
-    for (let r = 0; r < scale; r++) {
+    for (let r = 0; r < ro; r++) {
         for (let c = 0; c < scale; c++) {
             if (board[r][c] !== -1) {
                 board[r][c] = countMinesAround(r, c);
@@ -207,7 +265,7 @@ function calculateAllNumbers() {
 }
 
 function revealCell(r, c) {
-    if (r < 0 || r >= scale || c < 0 || c >= scale) return;
+    if (r < 0 || r >= ro || c < 0 || c >= ro) return;
     if (revealed[r][c]) return;
     
     revealed[r][c] = true;
@@ -219,7 +277,7 @@ function revealCell(r, c) {
         lose.play();
         
         // Показать ВСЕ мины
-        for (let row = 0; row < scale; row++) {
+        for (let row = 0; row < ro; row++) {
             for (let col = 0; col < scale; col++) {
                 if (board[row][col] === -1) {
                     revealed[row][col] = true;
@@ -242,7 +300,7 @@ function revealCell(r, c) {
 }
 
 function initflagged(){
-    for (let r = 0; r < scale; r++) {
+    for (let r = 0; r < ro; r++) {
         flagged[r] = [];
         for (let c = 0; c < scale; c++) {
             flagged[r][c] = false;
@@ -251,7 +309,7 @@ function initflagged(){
 }
 
 async function checkWin() {
-    for (let r = 0; r < scale; r++) {
+    for (let r = 0; r < ro; r++) {
         for (let c = 0; c < scale; c++) {
             if (board[r][c] !== -1 && !revealed[r][c]) {
                 return false;
@@ -312,8 +370,6 @@ async function checkWin() {
     return true;
 }
 
-let particles = [];
-
 function createExplosion(centerX, centerY) {
     for (let i = 0; i < 30; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -354,23 +410,22 @@ function startParticleAnimation() {
     }
     animate();
 }
-let timerInterval = null;
-let timerTime;
+
 function timerStarts(){
     timerInterval = setInterval(timerTick, 10);
-    timerTime=Date.now();
+    timerTime = Date.now();
 }
 
 function timerTick(){
     const now = Date.now();
-    const elaspsedSecond=(now-timerTime)/1000;
-    timerSpan.textContent=elaspsedSecond.toFixed(2)+'c';
+    const elaspsedSecond = (now - timerTime) / 1000;
+    timerSpan.textContent = elaspsedSecond.toFixed(2) + 'с';
 }
 
 function stopTimer(){
-    if(timerInterval!==null){
+    if(timerInterval !== null){
         clearInterval(timerInterval);
-        timerInterval=null;
+        timerInterval = null;
     }
 }
 
@@ -403,12 +458,11 @@ const canvasClickHandler = (e) => {
     draw();
 };
 
-let counter = mines;
 function toggleFlag(row, col){
     const tickFlag = new Audio('music/addFlag.mp3');
     tickFlag.play();
-    if(flagged[row][col])counter++;
-    else if(!flagged[row][col])counter--;
+    if(flagged[row][col]) counter++;
+    else if(!flagged[row][col]) counter--;
     flagged[row][col] = !flagged[row][col];
     minesCounter.textContent = counter;
 }
@@ -437,16 +491,22 @@ const canvasContextMenuHandler = (e) => {
 canvas.addEventListener('click', canvasClickHandler);
 canvas.addEventListener('contextmenu', canvasContextMenuHandler);
 
-const url = 'https://69db4051560857310a076f65.mockapi.io/leaders';
+
+
 async function getRecord() {
     try {
         const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         renderLeaders(data);
     } catch (error) {
-        console.error('Ошибка загрузки:', error);
+        const list = document.getElementById('leaderboardList');
+        if (list) {
+            list.innerHTML = '<li class="empty-message" style="color: #ffaaaa;">⚠️ Ошибка загрузки рекордов</li>';
+        }
     }
 }
+
 
 async function sendRecord(name, score) {
     try {
@@ -523,7 +583,7 @@ const rulesHTML = `
             <li>Открыть все безопасные ячейки — 🏆 победа</li>
             <li>Первый клик всегда безопасный</li>
             <li>Счётчик 🚩 показывает оставшиеся мины</li>
-            <li>Ставьте флажки в места, где по вашему мнению стоит мина. Всего 40 мин</li>
+            <li>Ставьте флажки в места, где по вашему мнению стоит мина. Всего ${mines} мин</li>
         </ul>
         <p><em>Цель: открыть все ячейки без мин как можно быстрее!</em></p>
         <button id="backToGameBtn" class="back-btn">◀ Назад к игре</button>
@@ -587,6 +647,32 @@ function restartGame() {
     
     stopTimer();
     
+    // Применяем настройки сложности заново
+    const currentDifficulty = difficultySelect.value;
+    canvas.classList.remove('square', 'rectangle');
+    
+    if (currentDifficulty === '1') {
+        scale = 9; ro = 9; mines = 10;
+        canvas.width = 300; canvas.height = 300;
+        canvas.style.width = '300px'; canvas.style.height = '300px';
+        canvas.classList.add('square');
+        url = 'https://69dcede984f912a264047274.mockapi.io/leaderseasy';
+    } else if (currentDifficulty === '2') {
+        scale = 16; ro = 16; mines = 40;
+        canvas.width = 480; canvas.height = 480;
+        canvas.style.width = '480px'; canvas.style.height = '480px';
+        canvas.classList.add('square');
+        url = 'https://69db4051560857310a076f65.mockapi.io/leaders';
+    } else if (currentDifficulty === '3') {
+        scale = 16; ro = 30; mines = 99;
+        canvas.width = 480; canvas.height = 900;
+        canvas.style.width = '480px'; canvas.style.height = '900px';
+        canvas.classList.add('rectangle');
+        url = 'https://69dcede984f912a264047274.mockapi.io/leadershard';
+    }
+    
+    CELL_SIZE = canvas.width / scale;
+    
     winGlow = 0;
     counter = mines;
     winAnimationStarted = false;
@@ -616,3 +702,7 @@ document.addEventListener('click', () => {
         musicStarted = true;
     }
 }, { once: false });
+
+difficultySelect.addEventListener('change', changeDifficulty);
+difficultySelect.value = '2';
+changeDifficulty();

@@ -11,10 +11,16 @@
     <audio id="bgMusic" loop>
         <source src="music/bg-music.mp3" type="audio/mpeg">
     </audio>
-    
+    <div id="difficultyPage">
+        <select name="" id="difficultySelect">
+            <option value="1">Лёгкий</option>
+            <option value="2">Средний</option>
+            <option value="3">Сложный</option>
+        </select>
+    </div>    
     <div id="wrapper">
         <h1>💣 Сапёр</h1>
-        
+
         <div class="game-layout">
             <div class="game-area">
                 <div class="score-panel">
@@ -34,7 +40,7 @@
             
             <div class="leaderboard-area">
                 <div class="leaderboard-title">
-                    <span>🏆 Мировые рекорды</span>
+                    <span>Мировые рекорды</span>
                 </div>
                 <ul id="leaderboardList" class="leaderboard-list">
                     <li class="empty-message">Загрузка...</li>

@@ -99,10 +99,20 @@ h1 {
     background: #0f1a24;
     box-shadow: 0 0 0 2px rgba(80, 140, 200, 0.2), 0 15px 25px rgba(0, 0, 0, 0.5), inset 0 2px 5px rgba(0,0,0,0.3);
     width: 100%;
-    max-width: 480px;
     height: auto;
-    aspect-ratio: 1 / 1;
     image-rendering: crisp-edges;
+}
+
+/* Квадратные режимы (лёгкий и средний) */
+#gameCanvas.square {
+    max-width: 480px;
+    aspect-ratio: 1 / 1;
+}
+
+/* Прямоугольный режим (сложный) */
+#gameCanvas.rectangle {
+    max-width: 480px;
+    aspect-ratio: 16 / 30;
 }
 
 .controls {
@@ -584,4 +594,54 @@ h1 {
 
 #rulesBtn:hover::after {
     transform: rotate(10deg) scale(1.1);
+}
+
+/* Стили для контейнера выбора сложности */
+#difficultyPage {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+}
+
+/* Стили для выпадающего списка сложности */
+#difficultySelect {
+    background: linear-gradient(145deg, #4a6a8a, #3a5a7a);
+    border: none;
+    border-radius: 60px;
+    padding: 12px 30px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #1e2e3e, 0 6px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.15s ease;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    text-transform: uppercase;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+    background-repeat: no-repeat;
+    background-position: right 20px center;
+    background-size: 18px;
+    padding-right: 50px;
+}
+
+#difficultySelect:hover {
+    background: linear-gradient(145deg, #5a7a9a, #4a6a8a);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 #1e2e3e, 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+#difficultySelect:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #1e2e3e, 0 5px 12px rgba(0, 0, 0, 0.3);
+}
+
+#difficultySelect option {
+    background: #1a2a3a;
+    color: white;
+    font-weight: 500;
 }
