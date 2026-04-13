@@ -265,12 +265,15 @@ function calculateAllNumbers() {
 }
 
 function revealCell(r, c) {
-    if (r < 0 || r >= ro || c < 0 || c >= ro) return;
+    if (r < 0 || r >= ro || c < 0 || c >= scale) return;
     if (revealed[r][c]) return;
     
     revealed[r][c] = true;
     
     if (board[r][c] === -1) {
+        // Проверяем, не закончена ли игра уже
+        if (gameOver) return;
+        
         gameOver = true;
         stopTimer();
         const lose = new Audio('music/lose.mp3');
