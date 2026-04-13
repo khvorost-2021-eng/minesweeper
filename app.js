@@ -43,7 +43,7 @@ function changeDifficulty() {
         canvas.width = 300; canvas.height = 300;
         canvas.style.width = '300px'; canvas.style.height = '300px';
         canvas.classList.add('square');
-        url = 'https://69dcede984f912a264047274.mockapi.io/leaderseasy';
+        url = 'https://69dcede984f912a264047274.mockapi.io/leaderboardeasy';
     } else if (difficulty === '2') {
         scale = 16; ro = 16; mines = 40;
         canvas.width = 480; canvas.height = 480;
@@ -55,7 +55,7 @@ function changeDifficulty() {
         canvas.width = 480; canvas.height = 900;
         canvas.style.width = '480px'; canvas.style.height = '900px';
         canvas.classList.add('rectangle');
-        url = 'https://69dcede984f912a264047274.mockapi.io/leadershard';
+        url = 'https://69dcede984f912a264047274.mockapi.io/lederboardhard';
     }
     
     CELL_SIZE = canvas.width / scale;
@@ -76,6 +76,7 @@ function changeDifficulty() {
     initRevealed();
     initflagged();
     draw();
+    getRecord();
 }
 
 function initRevealed(){
@@ -343,8 +344,7 @@ async function checkWin() {
     }
     
     const currentScore = parseFloat(timerSpan.textContent);
-    const roundedScore = Math.floor(currentScore);
-    
+    const roundedScore = Math.floor(currentScore);  
     // 1. Получаем текущие рекорды с сервера
     try {
         const response = await fetch(url);
@@ -371,6 +371,7 @@ async function checkWin() {
     
     paragraph.classList.add('winEffect');
     return true;
+
 }
 
 function createExplosion(centerX, centerY) {
@@ -695,6 +696,7 @@ function restartGame() {
     paragraph.classList.remove('lastEffect', 'winEffect');
     
     draw();
+    getRecord();
 }
 // Запуск музыки при первом клике
 let musicStarted = false;
