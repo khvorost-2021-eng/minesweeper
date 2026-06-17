@@ -4,7 +4,6 @@ const newGameBtn = document.getElementById('newGameBtn');
 const rulesBtn = document.getElementById('rulesBtn');
 const rulesContainer = document.getElementById('rulesContainer');
 const backToGameBtn = document.getElementById('backToGameBtn');
-const recordsBtn = document.getElementById('mobileRecordsBtn');
 const recordsContainer = document.getElementById('recordsContainer');
 const backFromRecordsBtn = document.getElementById('backFromRecordsBtn');
 const mobileLeaderboardList = document.getElementById('mobileLeaderboardList');
@@ -12,7 +11,6 @@ const difficultySelect = document.getElementById('difficultySelect');
 const paragraph = document.getElementById('message');
 const timerSpan = document.getElementById('timer');
 const minesCounter = document.getElementById('minesCounter');
-
 const mobileFlagBtn = document.getElementById('mobileFlagBtn');
 const mobileOpenBtn = document.getElementById('mobileOpenBtn');
 
@@ -21,9 +19,7 @@ const bgMusic = document.getElementById('bgMusic');
 const revealSound = document.getElementById('revealSound');
 const loseSound = document.getElementById('loseSound');
 const winSound = document.getElementById('winSound');
-
 let audioCtx = null;
-
 function initAudioContext() {
     if (!audioCtx) {
         try {
@@ -32,7 +28,6 @@ function initAudioContext() {
     }
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 }
-
 document.addEventListener('click', initAudioContext, { once: true });
 document.addEventListener('touchstart', initAudioContext, { once: true });
 
@@ -89,7 +84,6 @@ function playSound(sound, vol = 1.0) {
         sound.play().catch(() => {});
     } catch (e) {}
 }
-
 function playFlagSound(isPlacing = true) {
     if (!soundEnabled || !audioCtx) return;
     try {
@@ -98,7 +92,6 @@ function playFlagSound(isPlacing = true) {
         osc1.type = 'sine';
         osc1.frequency.setValueAtTime(isPlacing ? 220 : 160, now);
         osc1.frequency.exponentialRampToValueAtTime(isPlacing ? 80 : 60, now + 0.12);
-        
         const osc2 = audioCtx.createOscillator();
         osc2.type = 'triangle';
         osc2.frequency.setValueAtTime(isPlacing ? 440 : 320, now);
@@ -134,7 +127,6 @@ function changeDifficulty() {
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     const d = difficultySelect.value;
     canvas.classList.remove('square', 'rectangle');
-
     if (d === '1') {
         scale = 9; ro = 9; mines = 10;
         canvas.width = 300; canvas.height = 300;
@@ -151,23 +143,36 @@ function changeDifficulty() {
         canvas.classList.add('rectangle');
         currentLeaderboardName = 'saperhard';
     }
-
+    
+    // Синхронизация с вкладкой рекордов
+    currentRecordsTab = currentLeaderboardName;
+    updateRecordsTabs();
+    
     CELL_SIZE = canvas.width / scale;
     board = []; revealed = []; flagged = [];
     firstClick = true; gameOver = false; win = false;
     winGlow = 0; winAnimationStarted = false;
     elapsedBeforePause = 0; isPaused = false;
     particles = []; counter = mines; selectedCell = null;
-
+    
     const sec = window.getTranslation ? window.getTranslation('sec') : 'с';
     minesCounter.textContent = mines;
     timerSpan.textContent = '0.00' + sec;
     paragraph.textContent = '';
     paragraph.classList.remove('lastEffect', 'winEffect');
-
+    
     ctx = canvas.getContext('2d');
     initBoard(); initRevealed(); initflagged();
     draw(); updateMobileButtons(); getRecord();
+}
+
+function updateRecordsTabs() {
+    document.querySelectorAll('.records-diff-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.recordsDiff === currentRecordsTab) {
+            btn.classList.add('active');
+        }
+    });
 }
 
 difficultySelect.value = '2';
@@ -190,21 +195,18 @@ function initRevealed() {
         for (let c = 0; c < scale; c++) revealed[r][c] = false;
     }
 }
-
 function initBoard() {
     for (let r = 0; r < ro; r++) {
         board[r] = [];
         for (let c = 0; c < scale; c++) board[r][c] = 0;
     }
 }
-
 function initflagged() {
     for (let r = 0; r < ro; r++) {
         flagged[r] = [];
         for (let c = 0; c < scale; c++) flagged[r][c] = false;
     }
 }
-
 function placeMines(sr, sc) {
     let placed = 0;
     while (placed < mines) {
@@ -214,12 +216,10 @@ function placeMines(sr, sc) {
         if (board[r][c] !== -1) { board[r][c] = -1; placed++; }
     }
 }
-
 function draw() {
     updateParticles();
     ctx.fillStyle = '#3a4a5a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     for (let i = 1; i < scale; i++) {
         ctx.beginPath();
         ctx.moveTo(i * CELL_SIZE, 0);
@@ -231,14 +231,14 @@ function draw() {
         ctx.moveTo(0, i * CELL_SIZE);
         ctx.lineTo(canvas.width, i * CELL_SIZE);
         ctx.strokeStyle = '#1a2530'; ctx.lineWidth = 2; ctx.stroke();
-    }
-
+    } 
+    
     ctx.font = 'bold 20px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const colors = {1:'#0000ff', 2:'#008000', 3:'#ff0000', 4:'#000080', 
                     5:'#800000', 6:'#008080', 7:'#000000', 8:'#808080'};
-
+    
     for (let r = 0; r < ro; r++) {
         for (let c = 0; c < scale; c++) {
             if (revealed[r][c]) {
@@ -262,9 +262,9 @@ function draw() {
             }
         }
     }
-
+    
     drawSelection();
-
+    
     if (winGlow > 0) {
         const pulse = Math.sin(Date.now() * 0.02) * 0.25 + 0.65;
         for (let r = 0; r < ro; r++) {
@@ -276,13 +276,13 @@ function draw() {
             }
         }
     }
-
+    
     checkWin();
     if (win) {
         paragraph.textContent = (window.getTranslation ? window.getTranslation('winMsg') : '🏆 Победа за') + ' 🥇';
         return;
-    }
-
+    } 
+    
     for (let p of particles) {
         ctx.globalAlpha = p.alpha;
         ctx.fillStyle = p.color;
@@ -290,7 +290,6 @@ function draw() {
     }
     ctx.globalAlpha = 1.0;
 }
-
 function drawSelection() {
     if (!selectedCell) return;
     const { row, col } = selectedCell;
@@ -304,7 +303,6 @@ function drawSelection() {
     ctx.strokeRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
     if (!win && !gameOver) requestAnimationFrame(() => draw());
 }
-
 function countMinesAround(r, c) {
     let count = 0;
     for (let dr = -1; dr <= 1; dr++) {
@@ -316,13 +314,11 @@ function countMinesAround(r, c) {
     }
     return count;
 }
-
 function calculateAllNumbers() {
     for (let r = 0; r < ro; r++)
         for (let c = 0; c < scale; c++)
             if (board[r][c] !== -1) board[r][c] = countMinesAround(r, c);
 }
-
 function floodFill(r, c, playClick = false) {
     if (r < 0 || r >= ro || c < 0 || c >= scale) return;
     if (revealed[r][c]) return;
@@ -334,7 +330,6 @@ function floodFill(r, c, playClick = false) {
                 if (dr !== 0 || dc !== 0) floodFill(r + dr, c + dc, false);
     }
 }
-
 function revealCell(r, c) {
     if (r < 0 || r >= ro || c < 0 || c >= scale) return;
     if (revealed[r][c]) return;
@@ -360,17 +355,15 @@ function revealCell(r, c) {
         playSound(revealSound, 0.5);
     }
 }
-
 async function checkWin() {
     for (let r = 0; r < ro; r++)
         for (let c = 0; c < scale; c++)
             if (board[r][c] !== -1 && !revealed[r][c]) return false;
     if (win) return true;
-
     playSound(winSound);
     stopTimer();
     win = true; winGlow = 1.0;
-
+    
     if (!winAnimationStarted) {
         winAnimationStarted = true;
         const animate = () => {
@@ -382,11 +375,11 @@ async function checkWin() {
         };
         animate();
     }
-
+    
     const currentScore = parseFloat(timerSpan.textContent);
     const roundedScore = Math.floor(currentScore);
     const sec = window.getTranslation ? window.getTranslation('sec') : 'с';
-
+    
     const isAuth = window.isPlayerAuthorized ? window.isPlayerAuthorized() : false;
     if (isAuth && window.setLeaderboardScore) {
         await window.setLeaderboardScore(currentLeaderboardName, roundedScore);
@@ -397,7 +390,6 @@ async function checkWin() {
     getRecord();
     return true;
 }
-
 function createExplosion(cx, cy) {
     for (let i = 0; i < 30; i++) {
         const a = Math.random() * Math.PI * 2;
@@ -411,7 +403,6 @@ function createExplosion(cx, cy) {
         });
     }
 }
-
 function updateParticles() {
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -419,31 +410,26 @@ function updateParticles() {
         if (p.alpha <= 0 || p.y > canvas.height + 50) particles.splice(i, 1);
     }
 }
-
 function startParticleAnimation() {
     const animate = () => {
         if (particles.length > 0) { updateParticles(); draw(); requestAnimationFrame(animate); }
     };
     animate();
 }
-
 function timerStarts() {
     timerInterval = setInterval(timerTick, 10);
     timerTime = Date.now();
     elapsedBeforePause = 0; isPaused = false;
 }
-
 function timerTick() {
     const total = elapsedBeforePause + (Date.now() - timerTime) / 1000;
     const sec = window.getTranslation ? window.getTranslation('sec') : 'с';
     timerSpan.textContent = total.toFixed(2) + sec;
 }
-
 function stopTimer() {
     if (timerInterval !== null) { clearInterval(timerInterval); timerInterval = null; }
     isPaused = false;
 }
-
 function getCellFromCoords(cx, cy) {
     const rect = canvas.getBoundingClientRect();
     return {
@@ -459,7 +445,6 @@ function handleCanvasClick(e) {
     const { row, col } = getCellFromCoords(e.clientX, e.clientY);
     if (row < 0 || row >= ro || col < 0 || col >= scale) return;
     if (revealed[row][col]) return;
-
     if (e.button === 2) {
         playFlagSound(!flagged[row][col]);
         toggleFlag(row, col);
@@ -482,7 +467,6 @@ function handleCanvasClick(e) {
     draw();
     updateMobileButtons();
 }
-
 canvas.addEventListener('click', handleCanvasClick);
 canvas.addEventListener('contextmenu', (e) => { e.preventDefault(); handleCanvasClick(e); });
 
@@ -493,7 +477,6 @@ canvas.addEventListener('touchstart', (e) => {
     const { row, col } = getCellFromCoords(e.touches[0].clientX, e.touches[0].clientY);
     if (row < 0 || row >= ro || col < 0 || col >= scale) return;
     if (revealed[row][col]) return;
-
     if (!selectedCell) {
         selectedCell = { row, col };
     } else if (selectedCell.row === row && selectedCell.col === col) {
@@ -528,7 +511,6 @@ function openSelectedCell() {
     selectedCell = null;
     updateMobileButtons(); draw();
 }
-
 function flagSelectedCell() {
     if (!selectedCell || win || gameOver) return;
     const { row, col } = selectedCell;
@@ -537,13 +519,11 @@ function flagSelectedCell() {
     toggleFlag(row, col);
     updateMobileButtons(); draw();
 }
-
 function updateMobileButtons() {
     if (!mobileFlagBtn || !mobileOpenBtn) return;
     const t = window.getTranslation || ((k) => k);
     const hasSelection = selectedCell && !revealed[selectedCell.row][selectedCell.col];
     const isFlagged = hasSelection && flagged[selectedCell.row][selectedCell.col];
-    
     mobileFlagBtn.disabled = !hasSelection || win || gameOver;
     mobileOpenBtn.disabled = !hasSelection || win || gameOver || isFlagged;
     mobileOpenBtn.classList.toggle('active-pulse', hasSelection && !win && !gameOver && !isFlagged);
@@ -556,10 +536,8 @@ function updateMobileButtons() {
     }
     mobileOpenBtn.textContent = '✓ ' + (t('mobileOpen') || 'Открыть');
 }
-
 if (mobileFlagBtn) mobileFlagBtn.addEventListener('click', flagSelectedCell);
 if (mobileOpenBtn) mobileOpenBtn.addEventListener('click', openSelectedCell);
-
 function toggleFlag(row, col) {
     if (flagged[row][col]) counter++;
     else counter--;
@@ -572,7 +550,7 @@ async function getRecord() {
     const list = document.getElementById('leaderboardList');
     if (!sdkInitialized) {
         const t = window.getTranslation || ((k) => k);
-        list.innerHTML = `<li class="empty-message">${t('loading') || 'Загрузка...'}</li>`;
+        if (list) list.innerHTML = `<li class="empty-message">${t('loading') || 'Загрузка...'}</li>`;
         return;
     }
     const isAuth = window.isPlayerAuthorized ? window.isPlayerAuthorized() : false;
@@ -583,16 +561,14 @@ async function getRecord() {
             playerEntry = await window.getLeaderboardPlayerEntry(currentLeaderboardName);
         }
         renderLeaders(leaders, playerEntry, isAuth);
-    } catch (error) {
+    } catch (error) { 
         if (list) list.innerHTML = '<li class="empty-message" style="color: #ffaaaa;">⚠️ Ошибка</li>';
     }
 }
-
 function renderLeaders(leaders, playerEntry, isAuth) {
     const list = document.getElementById('leaderboardList');
     const t = window.getTranslation || ((k) => k);
     const sec = t('sec') || 'с';
-    
     if (!isAuth) {
         list.innerHTML = `<li class="auth-message">🔐 ${t('authRequired')}</li>`;
         return;
@@ -630,21 +606,7 @@ function renderLeaders(leaders, playerEntry, isAuth) {
     list.innerHTML = html;
 }
 
-// === 📱 МОБИЛЬНЫЙ ЛИДЕРБОРД ===
-if (recordsBtn) {
-    recordsBtn.addEventListener('click', async () => {
-        recordsContainer.style.display = 'flex';
-        currentRecordsTab = currentLeaderboardName;
-        await loadMobileRecords();
-    });
-}
-
-if (backFromRecordsBtn) {
-    backFromRecordsBtn.addEventListener('click', () => {
-        recordsContainer.style.display = 'none';
-    });
-}
-
+// === 📱 МОБИЛЬНЫЙ ЛИДЕРБОРД С ПЕРЕКЛЮЧАТЕЛЕМ ===
 async function loadMobileRecords() {
     const t = window.getTranslation || ((k) => k);
     const sec = t('sec') || 'с';
@@ -662,7 +624,6 @@ async function loadMobileRecords() {
         mobileLeaderboardList.innerHTML = '<li class="empty-message" style="color: #ffaaaa;">⚠️ Ошибка</li>';
     }
 }
-
 function renderMobileLeaders(leaders, playerEntry, isAuth, sec) {
     const t = window.getTranslation || ((k) => k);
     if (!isAuth) {
@@ -672,29 +633,14 @@ function renderMobileLeaders(leaders, playerEntry, isAuth, sec) {
     if (!leaders || leaders.length === 0) {
         mobileLeaderboardList.innerHTML = `<li class="empty-message">${t('noRecords')}</li>`;
         if (playerEntry) {
-            mobileLeaderboardList.innerHTML += `
-                <li class="player-position">
-                    <span class="player-place">${playerEntry.place}</span>
-                    <span class="player-info">${t('yourPlace')} ${playerEntry.place} ${t('place')}</span>
-                    <span class="player-score">${playerEntry.score}${sec}</span>
-                </li>`;
+            mobileLeaderboardList.innerHTML += `<li class="player-position"><span class="player-place">${playerEntry.place}</span><span class="player-info">${t('yourPlace')} ${playerEntry.place} ${t('place')}</span><span class="player-score">${playerEntry.score}${sec}</span></li>`;
         }
         return;
     }
     const top10 = leaders.slice(0, 10);
-    let html = top10.map(l => `
-        <li class="leader-item">
-            <span class="leader-place">${l.place}</span>
-            <span class="leader-name">${l.name}</span>
-            <span class="leader-score">${l.score}${sec}</span>
-        </li>`).join('');
+    let html = top10.map(l => `<li class="leader-item"><span class="leader-place">${l.place}</span><span class="leader-name">${l.name}</span><span class="leader-score">${l.score}${sec}</span></li>`).join('');
     if (playerEntry && playerEntry.place > 10) {
-        html += `
-            <li class="player-position">
-                <span class="player-place">${playerEntry.place}</span>
-                <span class="player-info">${t('yourPlace')} ${playerEntry.place} ${t('place')}</span>
-                <span class="player-score">${playerEntry.score}${sec}</span>
-            </li>`;
+        html += `<li class="player-position"><span class="player-place">${playerEntry.place}</span><span class="player-info">${t('yourPlace')} ${playerEntry.place} ${t('place')}</span><span class="player-score">${playerEntry.score}${sec}</span></li>`;
     }
     mobileLeaderboardList.innerHTML = html;
 }
@@ -716,13 +662,87 @@ function newGame() {
     paragraph.classList.remove('lastEffect', 'winEffect');
     updateMobileButtons(); draw();
 }
-
 getRecord();
 newGame();
+
+// Десктопная кнопка "Новая игра"
 newGameBtn.addEventListener('click', newGame);
+
+// 🆕 Мобильная кнопка "Новая игра"
+const mobileNewGameBtn = document.getElementById('mobileNewGameBtn');
+if (mobileNewGameBtn) {
+    mobileNewGameBtn.addEventListener('click', newGame);
+}
+
 document.getElementById('refreshBtn').addEventListener('click', getRecord);
 
-// === ПРАВИЛА ===
+// === 🆕 НОВОЕ МЕНЮ "ДОПОЛНИТЕЛЬНО" ===
+const additionalMenu = document.getElementById('additionalMenu');
+const mobileMoreBtn = document.getElementById('mobileMoreBtn');
+const menuRecordsBtn = document.getElementById('menuRecordsBtn');
+const menuRulesBtn = document.getElementById('menuRulesBtn');
+const menuSettingsBtn = document.getElementById('menuSettingsBtn');
+const menuBackBtn = document.getElementById('menuBackBtn');
+
+function openAdditionalMenu() {
+    additionalMenu.style.display = 'flex';
+    // Пауза игры
+    if (timerInterval !== null && !gameOver && !win && !firstClick) {
+        elapsedBeforePause += (Date.now() - timerTime) / 1000;
+        clearInterval(timerInterval);
+        timerInterval = null;
+        isPaused = true;
+    }
+}
+function closeAdditionalMenu() {
+    additionalMenu.style.display = 'none';
+    // Возобновление игры
+    if (isPaused && !gameOver && !win && !firstClick) {
+        timerTime = Date.now();
+        timerInterval = setInterval(timerTick, 10);
+        isPaused = false;
+    }
+}
+
+if (mobileMoreBtn) {
+    mobileMoreBtn.addEventListener('click', openAdditionalMenu);
+}
+
+// Кнопка "Рекорды" из меню
+if (menuRecordsBtn) {
+    menuRecordsBtn.addEventListener('click', async () => {
+        additionalMenu.style.display = 'none';
+        recordsContainer.style.display = 'flex';
+        currentRecordsTab = currentLeaderboardName; // Синхронизация
+        updateRecordsTabs();
+        await loadMobileRecords();
+    });
+}
+
+// Кнопка "Правила" из меню
+if (menuRulesBtn) {
+    menuRulesBtn.addEventListener('click', () => {
+        additionalMenu.style.display = 'none';
+        rulesContainer.style.display = 'flex';
+    });
+}
+
+// Кнопка "Настройки" из меню
+if (menuSettingsBtn) {
+    menuSettingsBtn.addEventListener('click', () => {
+        additionalMenu.style.display = 'none';
+        const sel = document.getElementById('langSelect');
+        if (sel) sel.value = window.getCurrentLang ? window.getCurrentLang() : 'ru';
+        settingsModal.style.display = 'flex';
+    });
+}
+
+// Кнопка "Назад" из меню
+if (menuBackBtn) {
+    menuBackBtn.addEventListener('click', closeAdditionalMenu);
+}
+
+// === ПРАВИЛА (десктопная кнопка) ===
 rulesBtn.addEventListener('click', () => {
     rulesContainer.style.display = 'flex';
     if (timerInterval !== null && !gameOver && !win && !firstClick) {
@@ -732,7 +752,6 @@ rulesBtn.addEventListener('click', () => {
         isPaused = true;
     }
 });
-
 backToGameBtn.addEventListener('click', () => {
     rulesContainer.style.display = 'none';
     if (isPaused && !gameOver && !win && !firstClick) {
@@ -742,45 +761,28 @@ backToGameBtn.addEventListener('click', () => {
     }
 });
 
+// === РЕКОРДЫ (мобильные) ===
+backFromRecordsBtn.addEventListener('click', () => {
+    recordsContainer.style.display = 'none';
+});
+
+// Переключатели сложности в рекордах
+document.querySelectorAll('.records-diff-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        document.querySelectorAll('.records-diff-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentRecordsTab = btn.dataset.recordsDiff;
+        await loadMobileRecords();
+    });
+});
+
 // === НАСТРОЙКИ ===
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.createElement('div');
 settingsModal.id = 'settingsModal';
 settingsModal.className = 'settings-modal';
 settingsModal.style.display = 'none';
-settingsModal.innerHTML = `
-    <div class="settings-modal-content">
-        <div class="settings-header">
-            <h3 id="settingsTitle">⚙️ Настройки</h3>
-            <button id="closeSettingsBtn" class="settings-close-icon">✕</button>
-        </div>
-        <div class="settings-body">
-            <div class="settings-row">
-                <label id="langLabel" class="settings-label">🌐 Язык</label>
-                <select id="langSelect" class="settings-select">
-                    <option value="ru">🇷🇺 Русский</option>
-                    <option value="en">🇬🇧 English</option>
-                </select>
-            </div>
-            <div class="settings-divider"></div>
-            <div class="settings-row">
-                <label id="soundLabel" class="settings-label">🔈 Звуки</label>
-                <label class="settings-toggle">
-                    <input type="checkbox" id="soundToggle" ${soundEnabled ? 'checked' : ''}>
-                    <span class="settings-toggle-slider"></span>
-                </label>
-            </div>
-            <div class="settings-divider"></div>
-            <div class="settings-row settings-row-vertical">
-                <div class="settings-label-row">
-                    <label id="volumeLabel" class="settings-label">🔊 Громкость</label>
-                    <span class="settings-value" id="volumeValue">${Math.round(masterVolume * 100)}%</span>
-                </div>
-                <input type="range" id="volumeSlider" class="settings-slider" 
-                       min="0" max="100" value="${Math.round(masterVolume * 100)}">
-            </div>
-        </div>
-    </div>`;
+settingsModal.innerHTML = `<div class="settings-modal-content"><div class="settings-header"><h3 id="settingsTitle">⚙️ Настройки</h3><button id="closeSettingsBtn" class="settings-close-icon">✕</button></div><div class="settings-body"><div class="settings-row"><label id="langLabel" class="settings-label">🌐 Язык</label><select id="langSelect" class="settings-select"><option value="ru">🇷🇺 Русский</option><option value="en">🇬🇧 English</option></select></div><div class="settings-divider"></div><div class="settings-row"><label id="soundLabel" class="settings-label">🔈 Звуки</label><label class="settings-toggle"><input type="checkbox" id="soundToggle" ${soundEnabled ? 'checked' : ''}><span class="settings-toggle-slider"></span></label></div><div class="settings-divider"></div><div class="settings-row settings-row-vertical"><div class="settings-label-row"><label id="volumeLabel" class="settings-label">🔊 Громкость</label><span class="settings-value" id="volumeValue">${Math.round(masterVolume * 100)}%</span></div><input type="range" id="volumeSlider" class="settings-slider" min="0" max="100" value="${Math.round(masterVolume * 100)}"></div></div></div>`;
 document.body.appendChild(settingsModal);
 
 function updateSliderFill(v) {
@@ -798,29 +800,23 @@ if (settingsBtn) {
         settingsModal.style.display = 'flex';
     });
 }
-
 document.getElementById('closeSettingsBtn').addEventListener('click', () => {
     settingsModal.style.display = 'none';
 });
-
 settingsModal.addEventListener('click', (e) => {
     if (e.target === settingsModal) settingsModal.style.display = 'none';
 });
-
 document.getElementById('langSelect').addEventListener('change', (e) => {
     if (window.applyTranslations) window.applyTranslations(e.target.value);
     updateAllTexts();
 });
-
 document.getElementById('soundToggle').addEventListener('change', (e) => {
     soundEnabled = e.target.checked;
     localStorage.setItem('saper_sound', soundEnabled);
 });
-
 document.getElementById('volumeSlider').addEventListener('input', (e) => {
     updateSliderFill(e.target.value);
 });
-
 document.getElementById('volumeSlider').addEventListener('change', (e) => {
     masterVolume = parseInt(e.target.value) / 100;
     localStorage.setItem('saper_volume', masterVolume);
@@ -833,13 +829,24 @@ function updateAllTexts() {
     newGameBtn.textContent = '🔄 ' + t('newGame');
     rulesBtn.textContent = '📋 ' + t('rules');
     if (settingsBtn) settingsBtn.textContent = '⚙️ ' + t('settings');
-    if (recordsBtn) recordsBtn.textContent = '🏆 ' + t('records');
+    
+    // Мобильные кнопки
+    if (mobileNewGameBtn) mobileNewGameBtn.textContent = '🔄 ' + t('newGame');
+    if (mobileMoreBtn) mobileMoreBtn.textContent = '➕ ' + (t('more') || 'Дополнительно');
+    
+    // Меню "Дополнительно"
+    const additionalMenuTitle = document.getElementById('additionalMenuTitle');
+    if (additionalMenuTitle) additionalMenuTitle.textContent = '➕ ' + (t('more') || 'Дополнительно');
+    if (menuRecordsBtn) menuRecordsBtn.textContent = '🏆 ' + t('records');
+    if (menuRulesBtn) menuRulesBtn.textContent = '📋 ' + t('rules');
+    if (menuSettingsBtn) menuSettingsBtn.textContent = '⚙️ ' + t('settings');
+    if (menuBackBtn) menuBackBtn.textContent = '◀ ' + t('back');
+    
     document.getElementById('refreshBtn').textContent = '🔄 ' + t('refresh');
     const backText = backToGameBtn.querySelector('.back-text');
     if (backText) backText.textContent = t('back');
     const backText2 = backFromRecordsBtn.querySelector('.back-text');
     if (backText2) backText2.textContent = t('back');
-    
     document.getElementById('gameTitle').textContent = '💣 ' + t('title');
     const rulesTitle = document.getElementById('rulesTitle');
     if (rulesTitle) rulesTitle.textContent = t('rulesTitle');
@@ -854,6 +861,11 @@ function updateAllTexts() {
     document.getElementById('diffEasy').textContent = t('optEasy');
     document.getElementById('diffMedium').textContent = t('optMedium');
     document.getElementById('diffHard').textContent = t('optHard');
+    
+    // Переключатели в рекордах
+    document.getElementById('recordsDiffEasy').textContent = t('optEasy');
+    document.getElementById('recordsDiffMedium').textContent = t('optMedium');
+    document.getElementById('recordsDiffHard').textContent = t('optHard');
     
     const settingsTitle = document.getElementById('settingsTitle');
     if (settingsTitle) settingsTitle.textContent = '⚙️ ' + t('settings');
@@ -874,7 +886,6 @@ function updateAllTexts() {
     updateMobileButtons();
     getRecord();
 }
-
 window.updateAllTexts = updateAllTexts;
 setTimeout(updateAllTexts, 500);
 
@@ -884,5 +895,4 @@ if (window.onSDKReady) {
         getRecord();
     });
 }
-
 document.addEventListener('contextmenu', (e) => e.preventDefault());
