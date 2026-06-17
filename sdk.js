@@ -3,7 +3,6 @@ let lb = null;
 let currentLang = 'ru';
 let isAuthorized = false;
 let sdkReadyCallbacks = [];
-
 const translations = {
     ru: {
         title: "Сапёр",
@@ -19,6 +18,7 @@ const translations = {
         mobileFlag: "Флажок", mobileUnflag: "Снять флажок", mobileOpen: "Открыть",
         authRequired: "Авторизуйтесь в Яндексе, чтобы участвовать в рейтинге",
         yourPlace: "Вы на", place: "месте",
+        more: "Дополнительно",
         rule1: "🖱️ <strong>Левый клик</strong> — открыть ячейку",
         rule2: "🚩 <strong>Правый клик</strong> — поставить/убрать флажок",
         rule3: "📱 <strong>На телефоне:</strong> выделите клетку, затем используйте кнопки",
@@ -44,6 +44,7 @@ const translations = {
         mobileFlag: "Flag", mobileUnflag: "Remove flag", mobileOpen: "Open",
         authRequired: "Sign in to Yandex to participate in the leaderboard",
         yourPlace: "You are at", place: "place",
+        more: "More",
         rule1: "🖱️ <strong>Left click</strong> — reveal cell",
         rule2: "🚩 <strong>Right click</strong> — place/remove flag",
         rule3: "📱 <strong>On mobile:</strong> select cell, then use buttons",
@@ -56,7 +57,6 @@ const translations = {
         rulesGoal: "🎯 Goal: reveal all safe cells as fast as possible!"
     }
 };
-
 function applyTranslations(lang) {
     currentLang = lang;
     localStorage.setItem('saper_lang', lang);
@@ -67,7 +67,6 @@ function applyTranslations(lang) {
     }
 }
 window.applyTranslations = applyTranslations;
-
 window.onSDKReady = function(callback) {
     if (ysdk && typeof isAuthorized !== 'undefined') {
         callback(isAuthorized);
@@ -75,17 +74,13 @@ window.onSDKReady = function(callback) {
         sdkReadyCallbacks.push(callback);
     }
 };
-
 async function initSDK() {
     try {
         ysdk = await YaGames.init();
-        console.log('SDK готов');
         window.ysdk = ysdk;
-
         try {
             const player = await ysdk.player.getData();
             isAuthorized = !!(player && player.uid);
-            console.log('Авторизация:', isAuthorized ? 'Да' : 'Нет');
         } catch (e) {
             isAuthorized = false;
         }
@@ -107,10 +102,7 @@ async function initSDK() {
 
         try {
             lb = await ysdk.getLeaderboards();
-            console.log('Лидерборды инициализированы');
-        } catch (e) {
-            console.log('Лидерборды недоступны:', e);
-        }
+        } catch (e) {}
 
         sdkReadyCallbacks.forEach(callback => callback(isAuthorized));
         sdkReadyCallbacks = [];
@@ -135,14 +127,12 @@ async function initSDK() {
             }
         };
     } catch (err) {
-        console.log('SDK не загрузился:', err);
         isAuthorized = false;
         applyTranslations('ru');
         sdkReadyCallbacks.forEach(callback => callback(false));
         sdkReadyCallbacks = [];
     }
 }
-
 async function loadPlayerName() {
     try {
         const player = await ysdk.player.getData();
@@ -153,7 +143,6 @@ async function loadPlayerName() {
     } catch (e) {}
     window.playerName = localStorage.getItem('minesweeper_playerName') || null;
 }
-
 function savePlayerName(name) {
     window.playerName = name;
     try {
@@ -161,51 +150,39 @@ function savePlayerName(name) {
         if (ysdk) ysdk.player.setData({ name: name }).catch(() => {});
     } catch (e) {}
 }
-
 window.setLeaderboardScore = async function(leaderboardName, score) {
     if (!isAuthorized) return false;
     if (lb) {
         try {
             await lb.setLeaderboardScore(leaderboardName, score);
             return true;
-        } catch (e) { 
-            console.error('Ошибка отправки рекорда:', e);
-            return false;
-        }
+        } catch (e) { return false; }
     }
     return false;
 };
-
 window.getLeaderboardScores = async function(leaderboardName) {
     if (lb) {
         try {
-            const data = await lb.getLeaderboardEntries(leaderboardName, { 
-                quantityTop: 10, quantityAround: 0 
+            const data = await lb.getLeaderboardEntries(leaderboardName, {
+                quantityTop: 10, quantityAround: 0
             });
             return data.entries.map((e, index) => ({
                 place: index + 1,
                 name: e.player.publicName || 'Игрок',
                 score: e.score
             }));
-        } catch (e) { 
-            return []; 
-        }
+        } catch (e) { return []; }
     }
     return [];
 };
-
 window.getLeaderboardPlayerEntry = async function(leaderboardName) {
     if (!isAuthorized || !lb) return null;
     try {
         const entry = await lb.getLeaderboardPlayerEntry(leaderboardName);
         return { place: entry.rank, score: entry.score };
-    } catch (e) {
-        return null;
-    }
+    } catch (e) { return null; }
 };
-
 window.isPlayerAuthorized = function() { return isAuthorized; };
 window.getCurrentLang = () => currentLang;
 window.getTranslation = (key) => translations[currentLang][key] || translations.ru[key];
-
 initSDK();

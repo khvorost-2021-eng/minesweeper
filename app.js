@@ -40,14 +40,12 @@ let soundEnabled = localStorage.getItem('saper_sound') !== 'false';
 let masterVolume = parseFloat(localStorage.getItem('saper_volume')) || 0.8;
 let sdkInitialized = false;
 
-// Блокировка скролла
 document.addEventListener('wheel', (e) => e.preventDefault(), { passive: false });
 document.addEventListener('touchmove', (e) => {
     const scrollable = ['.leaderboard-list', '.rules-content', '.records-content', '.settings-modal-content'];
     if (!scrollable.some(sel => e.target.closest(sel))) e.preventDefault();
 }, { passive: false });
 
-// Пауза при уходе со страницы
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
         if (timerInterval !== null && !gameOver && !win && !firstClick) {
@@ -65,7 +63,6 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-// 🔊 Функции звуков через Web Audio API
 function playClickSound() {
     if (!soundEnabled || !audioCtx) return;
     try {
@@ -95,16 +92,13 @@ function playFlagSound(isPlacing = true) {
         }
         const noise = audioCtx.createBufferSource();
         noise.buffer = buffer;
-        
         const filter = audioCtx.createBiquadFilter();
         filter.type = 'bandpass';
         filter.frequency.setValueAtTime(isPlacing ? 800 : 400, now);
         filter.Q.setValueAtTime(2, now);
-        
         const gain = audioCtx.createGain();
         gain.gain.setValueAtTime(0.5 * masterVolume, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
-        
         noise.connect(filter);
         filter.connect(gain);
         gain.connect(audioCtx.destination);
@@ -172,7 +166,6 @@ function changeDifficulty() {
         canvas.classList.add('square');
         currentLeaderboardName = 'saperhard';
     }
-    // Синхронизация с вкладкой рекордов
     currentRecordsTab = currentLeaderboardName;
     updateRecordsTabs();
 
@@ -205,7 +198,6 @@ difficultySelect.value = '2';
 changeDifficulty();
 difficultySelect.addEventListener('change', changeDifficulty);
 
-// 📱 Обработчики мобильных кнопок сложности
 document.querySelectorAll('.diff-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
@@ -461,7 +453,6 @@ function getCellFromCoords(cx, cy) {
         row: Math.floor((cy - rect.top) * (canvas.height / rect.height) / CELL_SIZE)
     };
 }
-// 🖱️ ПК обработка
 function handleCanvasClick(e) {
     if (win || gameOver || isPaused) return;
     e.preventDefault();
@@ -487,7 +478,6 @@ function handleCanvasClick(e) {
 }
 canvas.addEventListener('click', handleCanvasClick);
 canvas.addEventListener('contextmenu', (e) => { e.preventDefault(); handleCanvasClick(e); });
-// 📱 Мобильная обработка
 canvas.addEventListener('touchstart', (e) => {
     if (win || gameOver || isPaused) return;
     e.preventDefault();
@@ -554,7 +544,6 @@ function toggleFlag(row, col) {
     flagged[row][col] = !flagged[row][col];
     minesCounter.textContent = counter;
 }
-// === ТАБЛИЦА ЛИДЕРОВ (десктопная) ===
 async function getRecord() {
     const list = document.getElementById('leaderboardList');
     if (!sdkInitialized) {
@@ -613,7 +602,6 @@ function renderLeaders(leaders, playerEntry, isAuth) {
     }
     list.innerHTML = html;
 }
-// === 📱 МОБИЛЬНЫЙ ЛИДЕРБОРД С ПЕРЕКЛЮЧАТЕЛЕМ ===
 async function loadMobileRecords() {
     const t = window.getTranslation || ((k) => k);
     const sec = t('sec') || 'с';
@@ -651,7 +639,6 @@ function renderMobileLeaders(leaders, playerEntry, isAuth, sec) {
     }
     mobileLeaderboardList.innerHTML = html;
 }
-// === НОВАЯ ИГРА ===
 function newGame() {
     stopTimer();
     elapsedBeforePause = 0; isPaused = false;
@@ -670,15 +657,12 @@ function newGame() {
 }
 getRecord();
 newGame();
-// Десктопная кнопка "Новая игра"
 newGameBtn.addEventListener('click', newGame);
-// 🆕 Мобильная кнопка "Новая игра"
 const mobileNewGameBtn = document.getElementById('mobileNewGameBtn');
 if (mobileNewGameBtn) {
     mobileNewGameBtn.addEventListener('click', newGame);
 }
 document.getElementById('refreshBtn').addEventListener('click', getRecord);
-// === 🆕 НОВОЕ МЕНЮ "ДОПОЛНИТЕЛЬНО" ===
 const additionalMenu = document.getElementById('additionalMenu');
 const mobileMoreBtn = document.getElementById('mobileMoreBtn');
 const menuRecordsBtn = document.getElementById('menuRecordsBtn');
@@ -731,7 +715,6 @@ if (menuSettingsBtn) {
 if (menuBackBtn) {
     menuBackBtn.addEventListener('click', closeAdditionalMenu);
 }
-// === ПРАВИЛА (десктопная кнопка) ===
 rulesBtn.addEventListener('click', () => {
     rulesContainer.style.display = 'flex';
     if (timerInterval !== null && !gameOver && !win && !firstClick) {
@@ -749,7 +732,6 @@ backToGameBtn.addEventListener('click', () => {
         isPaused = false;
     }
 });
-// === РЕКОРДЫ (мобильные) ===
 backFromRecordsBtn.addEventListener('click', () => {
     recordsContainer.style.display = 'none';
 });
@@ -761,7 +743,6 @@ document.querySelectorAll('.records-diff-btn').forEach(btn => {
         await loadMobileRecords();
     });
 });
-// === НАСТРОЙКИ ===
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.createElement('div');
 settingsModal.id = 'settingsModal';
@@ -811,6 +792,7 @@ function updateAllTexts() {
     newGameBtn.textContent = '🔄 ' + t('newGame');
     rulesBtn.textContent = '📋 ' + t('rules');
     if (settingsBtn) settingsBtn.textContent = '⚙️ ' + t('settings');
+    
     if (mobileNewGameBtn) mobileNewGameBtn.textContent = '🔄 ' + t('newGame');
     if (mobileMoreBtn) mobileMoreBtn.textContent = '➕ ' + (t('more') || 'Дополнительно');
 
@@ -845,7 +827,6 @@ function updateAllTexts() {
     document.getElementById('recordsDiffMedium').textContent = t('optMedium');
     document.getElementById('recordsDiffHard').textContent = t('optHard');
 
-    // Перевод настроек
     const settingsTitle = document.getElementById('settingsTitle');
     if (settingsTitle) settingsTitle.textContent = '⚙️ ' + t('settings');
     const langLabel = document.getElementById('langLabel');

@@ -1,6 +1,3 @@
-/* ==========================================================================
-   1. ГЛОБАЛЬНЫЕ НАСТРОЙКИ И ЖЕСТКАЯ БЛОКИРОВКА ПРОКРУТКИ
-   ========================================================================== */
 *, *::before, ::after {
     box-sizing: border-box;
     margin: 0;
@@ -38,9 +35,6 @@ audio {
     pointer-events: none !important;
 }
 
-/* ==========================================================================
-   2. ОСНОВНОЙ КОНТЕЙНЕР
-   ========================================================================== */
 #wrapper {
     max-width: 1000px;
     width: 100%;
@@ -84,9 +78,6 @@ h1 {
     align-items: center;
 }
 
-/* ==========================================================================
-   3. ПАНЕЛЬ СЧЕТА И СЛОЖНОСТЬ
-   ========================================================================== */
 .score-panel {
     display: flex;
     justify-content: space-between;
@@ -149,10 +140,7 @@ h1 {
     background-size: 14px;
 }
 
-.desktop-only option { 
-    background: #1a2a3a; 
-    color: white; 
-}
+.desktop-only option { background: #1a2a3a; color: white; }
 
 .mobile-difficulty-buttons {
     display: none;
@@ -181,9 +169,6 @@ h1 {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* ==========================================================================
-   4. CANVAS
-   ========================================================================== */
 #gameCanvas {
     display: block;
     margin: 0 auto 10px;
@@ -197,14 +182,8 @@ h1 {
     cursor: pointer;
 }
 
-#gameCanvas.square { 
-    max-width: 480px; 
-    aspect-ratio: 1 / 1; 
-}
+#gameCanvas.square { max-width: 480px; aspect-ratio: 1 / 1; }
 
-/* ==========================================================================
-   5. КНОПКИ УПРАВЛЕНИЯ
-   ========================================================================== */
 .controls {
     display: flex;
     justify-content: center;
@@ -290,9 +269,6 @@ h1 {
     background: linear-gradient(145deg, #f59e0b, #d97706);
 }
 
-/* ==========================================================================
-   6. 📱 МОБИЛЬНЫЕ КНОПКИ УПРАВЛЕНИЯ
-   ========================================================================== */
 .mobile-controls {
     display: none;
     justify-content: center;
@@ -340,9 +316,6 @@ h1 {
     50% { box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3), 0 6px 15px rgba(0, 0, 0, 0.25), 0 0 0 10px rgba(16, 185, 129, 0); }
 }
 
-/* ==========================================================================
-   7. ЛИДЕРБОРД И СООБЩЕНИЯ
-   ========================================================================== */
 .leaderboard-area {
     flex: 0 1 240px;
     min-width: 220px;
@@ -477,9 +450,6 @@ h1 {
 @keyframes winPulse { 0% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
 .winEffect { animation: winPulse 2s ease-out forwards !important; font-weight: 700 !important; color: #ffd700 !important; }
 
-/* ==========================================================================
-   8. 📋 ОВЕРЛЕЙ ПРАВИЛ (УВЕЛИЧЕННЫЙ ТЕКСТ ДЛЯ ДЕСКТОПА)
-   ========================================================================== */
 @keyframes fadeIn { 0% { opacity: 0; transform: translateY(15px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
 
 .rules-overlay {
@@ -545,10 +515,7 @@ h1 {
     line-height: 1.35;
 }
 
-.rules-container li strong {
-    color: #a0d0ff;
-    font-weight: 700;
-}
+.rules-container li strong { color: #a0d0ff; font-weight: 700; }
 
 .rules-container li:hover { 
     background: linear-gradient(135deg, rgba(74, 106, 138, 0.28), rgba(58, 90, 122, 0.18)); 
@@ -625,9 +592,6 @@ h1 {
 
 .back-btn:hover .back-arrow { animation: none; transform: translateX(-5px) scale(1.1); }
 
-/* ==========================================================================
-   9. 📱 ОВЕРЛЕЙ РЕКОРДОВ (С ПЕРЕКЛЮЧАТЕЛЕМ СЛОЖНОСТИ)
-   ========================================================================== */
 .records-overlay {
     position: fixed;
     top: 0; left: 0;
@@ -693,9 +657,6 @@ h1 {
     box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4);
 }
 
-/* ==========================================================================
-   10. 🎨 ОКНО НАСТРОЕК
-   ========================================================================== */
 .settings-modal {
     position: fixed;
     top: 0; left: 0;
@@ -815,9 +776,6 @@ h1 {
 
 .settings-slider::-moz-range-progress { background: rgba(74, 158, 255, 0.8); height: 6px; border-radius: 10px; }
 
-/* ==========================================================================
-   11. 📱 НОВОЕ МЕНЮ "ДОПОЛНИТЕЛЬНО"
-   ========================================================================== */
 .additional-menu {
     position: fixed;
     top: 0; left: 0;
@@ -883,14 +841,13 @@ h1 {
     margin-top: 8px;
 }
 
-/* ==========================================================================
-   12. 📱 МОБИЛЬНАЯ АДАПТАЦИЯ
-   ========================================================================== */ 
 @media (max-width: 768px) {
     .mobile-difficulty-buttons { display: flex !important; }
     .mobile-controls { display: flex !important; }
     .mobile-only { display: flex !important; flex-direction: column; align-items: center; gap: 8px !important; }
     .mobile-only .game-btn { width: 100% !important; max-width: 300px !important; }
+    
+    .controls { display: none !important; }
     .leaderboard-area { display: none !important; }
     .desktop-only { display: none !important; }
 
@@ -900,10 +857,6 @@ h1 {
     #wrapper { padding: 20px 16px 16px; }
     h1 { font-size: 1.6rem !important; margin-bottom: 10px !important; }
 
-    .controls { flex-direction: column; align-items: center; gap: 8px !important; }
-    .controls .game-btn { width: 100% !important; max-width: 300px !important; padding: 10px 12px !important; font-size: 0.85rem !important; }
-
-    /* Правила на мобильном — компактнее, разрешаем прокрутку */
     .rules-overlay {
         overflow-y: auto !important;
         align-items: flex-start !important;
@@ -917,9 +870,7 @@ h1 {
         font-size: 1.3rem !important;
         margin-bottom: 12px !important;
     }
-    .rules-container ul {
-        gap: 6px !important;
-    }
+    .rules-container ul { gap: 6px !important; }
     .rules-container li {
         font-size: 0.85rem !important;
         padding: 6px 10px !important;
@@ -948,9 +899,4 @@ h1 {
     .records-diff-btn { font-size: 0.8rem; padding: 8px 4px; }
 }
 
-/* ==========================================================================
-   13. СКРЫТИЕ ЛИШНИХ ЭЛЕМЕНТОВ НА ДЕСКТОПЕ
-   ========================================================================== */
-#recordsBtn {
-    display: none !important;
-}
+#recordsBtn { display: none !important; }
