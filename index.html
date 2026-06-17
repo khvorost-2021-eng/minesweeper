@@ -38,14 +38,17 @@
                     <button id="mobileOpenBtn" class="mobile-btn open-btn" disabled>✓ Открыть</button>
                 </div>
 
+                <!-- ДЕСКТОПНЫЕ кнопки (по умолчанию видны на ПК, скрыты на мобильном) -->
                 <div class="controls">
                     <button id="newGameBtn" class="game-btn">🔄 Новая игра</button>
                     <button id="rulesBtn" class="game-btn">📋 Правила</button>
                     <button id="settingsBtn" class="game-btn settings-btn">⚙️ Настройки</button>
                 </div>
 
-                <div class="mobile-only" style="display: none;">
+                <!-- МОБИЛЬНЫЕ кнопки (по умолчанию скрыты на ПК, видны на мобильном) -->
+                <div class="mobile-only">
                     <button id="mobileNewGameBtn" class="game-btn">🔄 Новая игра</button>
+                    <button id="mobileRecordsBtn" class="game-btn records-btn">🏆 Рекорды</button>
                     <button id="mobileMoreBtn" class="game-btn more-btn">➕ Дополнительно</button>
                 </div>
 
@@ -61,7 +64,6 @@
             </div>
         </div>
 
-        <!-- Оверлей Правил -->
         <div id="rulesContainer" class="rules-overlay" style="display: none;">
             <div class="rules-container">
                 <h2 id="rulesTitle">📋 Правила игры «Сапёр»</h2>
@@ -84,7 +86,6 @@
             </div>
         </div>
 
-        <!-- Оверлей Рекордов (Мобильный) -->
         <div id="recordsContainer" class="records-overlay" style="display: none;">
             <div class="records-content">
                 <h2 id="recordsTitle">🏆 Мировые рекорды</h2>
@@ -103,12 +104,10 @@
             </div>
         </div>
 
-        <!-- Меню Дополнительно (Мобильное) -->
         <div id="additionalMenu" class="additional-menu" style="display: none;">
             <div class="additional-menu-content">
                 <h2 id="additionalMenuTitle">➕ Дополнительно</h2>
                 <div class="additional-menu-buttons">
-                    <button id="menuRecordsBtn" class="additional-btn">🏆 Рекорды</button>
                     <button id="menuRulesBtn" class="additional-btn">📋 Правила</button>
                     <button id="menuSettingsBtn" class="additional-btn">⚙️ Настройки</button>
                     <button id="menuBackBtn" class="additional-btn back-action">◀ Назад</button>

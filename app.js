@@ -657,53 +657,47 @@ function newGame() {
 }
 getRecord();
 newGame();
+
+// === ДЕСКТОПНЫЕ кнопки ===
 newGameBtn.addEventListener('click', newGame);
+rulesBtn.addEventListener('click', () => { rulesContainer.style.display = 'flex'; });
+
+// === МОБИЛЬНЫЕ кнопки ===
 const mobileNewGameBtn = document.getElementById('mobileNewGameBtn');
-if (mobileNewGameBtn) {
-    mobileNewGameBtn.addEventListener('click', newGame);
-}
-document.getElementById('refreshBtn').addEventListener('click', getRecord);
-const additionalMenu = document.getElementById('additionalMenu');
+const mobileRecordsBtn = document.getElementById('mobileRecordsBtn');
 const mobileMoreBtn = document.getElementById('mobileMoreBtn');
-const menuRecordsBtn = document.getElementById('menuRecordsBtn');
-const menuRulesBtn = document.getElementById('menuRulesBtn');
-const menuSettingsBtn = document.getElementById('menuSettingsBtn');
-const menuBackBtn = document.getElementById('menuBackBtn');
-function openAdditionalMenu() {
-    additionalMenu.style.display = 'flex';
-    if (timerInterval !== null && !gameOver && !win && !firstClick) {
-        elapsedBeforePause += (Date.now() - timerTime) / 1000;
-        clearInterval(timerInterval);
-        timerInterval = null;
-        isPaused = true;
-    }
-}
-function closeAdditionalMenu() {
-    additionalMenu.style.display = 'none';
-    if (isPaused && !gameOver && !win && !firstClick) {
-        timerTime = Date.now();
-        timerInterval = setInterval(timerTick, 10);
-        isPaused = false;
-    }
-}
-if (mobileMoreBtn) {
-    mobileMoreBtn.addEventListener('click', openAdditionalMenu);
-}
-if (menuRecordsBtn) {
-    menuRecordsBtn.addEventListener('click', async () => {
-        additionalMenu.style.display = 'none';
-        if (recordsContainer) recordsContainer.style.display = 'flex';
+
+if (mobileNewGameBtn) mobileNewGameBtn.addEventListener('click', newGame);
+
+// Кнопка Рекорды — просто открывает экран рекордов
+if (mobileRecordsBtn) {
+    mobileRecordsBtn.addEventListener('click', async () => {
         currentRecordsTab = currentLeaderboardName;
         updateRecordsTabs();
+        recordsContainer.style.display = 'flex';
         await loadMobileRecords();
     });
 }
+
+// === Меню "Дополнительно" ===
+const additionalMenu = document.getElementById('additionalMenu');
+const menuRulesBtn = document.getElementById('menuRulesBtn');
+const menuSettingsBtn = document.getElementById('menuSettingsBtn');
+const menuBackBtn = document.getElementById('menuBackBtn');
+
+if (mobileMoreBtn) {
+    mobileMoreBtn.addEventListener('click', () => {
+        additionalMenu.style.display = 'flex';
+    });
+}
+
 if (menuRulesBtn) {
     menuRulesBtn.addEventListener('click', () => {
         additionalMenu.style.display = 'none';
-        if (rulesContainer) rulesContainer.style.display = 'flex';
+        rulesContainer.style.display = 'flex';
     });
 }
+
 if (menuSettingsBtn) {
     menuSettingsBtn.addEventListener('click', () => {
         additionalMenu.style.display = 'none';
@@ -712,29 +706,22 @@ if (menuSettingsBtn) {
         settingsModal.style.display = 'flex';
     });
 }
+
 if (menuBackBtn) {
-    menuBackBtn.addEventListener('click', closeAdditionalMenu);
+    menuBackBtn.addEventListener('click', () => {
+        additionalMenu.style.display = 'none';
+    });
 }
-rulesBtn.addEventListener('click', () => {
-    rulesContainer.style.display = 'flex';
-    if (timerInterval !== null && !gameOver && !win && !firstClick) {
-        elapsedBeforePause += (Date.now() - timerTime) / 1000;
-        clearInterval(timerInterval);
-        timerInterval = null;
-        isPaused = true;
-    }
-});
+
+// === Кнопки закрытия оверлеев ===
 backToGameBtn.addEventListener('click', () => {
     rulesContainer.style.display = 'none';
-    if (isPaused && !gameOver && !win && !firstClick) {
-        timerTime = Date.now();
-        timerInterval = setInterval(timerTick, 10);
-        isPaused = false;
-    }
 });
+
 backFromRecordsBtn.addEventListener('click', () => {
     recordsContainer.style.display = 'none';
 });
+
 document.querySelectorAll('.records-diff-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
         document.querySelectorAll('.records-diff-btn').forEach(b => b.classList.remove('active'));
@@ -743,6 +730,10 @@ document.querySelectorAll('.records-diff-btn').forEach(btn => {
         await loadMobileRecords();
     });
 });
+
+document.getElementById('refreshBtn').addEventListener('click', getRecord);
+
+// === НАСТРОЙКИ ===
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.createElement('div');
 settingsModal.id = 'settingsModal';
@@ -787,18 +778,23 @@ document.getElementById('volumeSlider').addEventListener('change', (e) => {
     updateSliderFill(e.target.value);
     playFlagSound(true);
 });
+
 function updateAllTexts() {
     const t = window.getTranslation || ((k) => k);
+    
+    // Десктопные кнопки
     newGameBtn.textContent = '🔄 ' + t('newGame');
     rulesBtn.textContent = '📋 ' + t('rules');
     if (settingsBtn) settingsBtn.textContent = '⚙️ ' + t('settings');
     
+    // Мобильные кнопки
     if (mobileNewGameBtn) mobileNewGameBtn.textContent = '🔄 ' + t('newGame');
+    if (mobileRecordsBtn) mobileRecordsBtn.textContent = '🏆 ' + t('records');
     if (mobileMoreBtn) mobileMoreBtn.textContent = '➕ ' + (t('more') || 'Дополнительно');
 
+    // Меню Дополнительно
     const additionalMenuTitle = document.getElementById('additionalMenuTitle');
     if (additionalMenuTitle) additionalMenuTitle.textContent = '➕ ' + (t('more') || 'Дополнительно');
-    if (menuRecordsBtn) menuRecordsBtn.textContent = '🏆 ' + t('records');
     if (menuRulesBtn) menuRulesBtn.textContent = '📋 ' + t('rules');
     if (menuSettingsBtn) menuSettingsBtn.textContent = '⚙️ ' + t('settings');
     if (menuBackBtn) menuBackBtn.textContent = '◀ ' + t('back');
