@@ -9,50 +9,50 @@ const translations = {
         title: "Сапёр",
         rulesTitle: "📋 Правила игры «Сапёр»",
         leaderboardTitle: "Мировые рекорды",
+        recordsTitle: "🏆 Мировые рекорды",
         optEasy: "Лёгкий", optMedium: "Средний", optHard: "Сложный",
-        newGame: "Новая игра", rules: "Правила", settings: "Настройки",
+        newGame: "Новая игра", rules: "Правила", settings: "Настройки", records: "Рекорды",
         language: "Язык", sound: "Звук", close: "Закрыть", refresh: "Обновить",
         back: "Назад к игре", sec: "с", volume: "Громкость",
         winMsg: "🏆 Победа за", loseMsg: "💥 Вы проиграли!",
-        noRecords: "Пока нет рекордов",
-        mobileFlag: "Флажок", mobileOpen: "Открыть",
+        noRecords: "Пока нет рекордов", loading: "Загрузка...",
+        mobileFlag: "Флажок", mobileUnflag: "Снять флажок", mobileOpen: "Открыть",
         authRequired: "Авторизуйтесь в Яндексе, чтобы участвовать в рейтинге",
-        yourPlace: "Вы на",
-        place: "месте",
-        loading: "Загрузка...",
+        yourPlace: "Вы на", place: "месте",
         rule1: "🖱️ <strong>Левый клик</strong> — открыть ячейку",
         rule2: "🚩 <strong>Правый клик</strong> — поставить/убрать флажок",
-        rule3: "📱 <strong>На телефоне:</strong> 1-й тап выделяет клетку, 2-й — открывает",
+        rule3: "📱 <strong>На телефоне:</strong> выделите клетку, затем используйте кнопки",
         rule4: "🔢 Цифра показывает количество мин вокруг",
         rule5: "💥 Если открыть мину — поражение",
         rule6: "🏆 Откройте все безопасные ячейки для победы",
         rule7: "🛡️ Первый клик всегда безопасный",
-        rule8: "🔐 <strong>Авторизуйтесь в Яндексе</strong>, чтобы сохранять рекорды в таблицу лидеров",
+        rule8: "🚫 На клетку с флажком нельзя нажать — сначала снимите его",
+        rule9: "🔐 <strong>Авторизуйтесь в Яндексе</strong>, чтобы сохранять рекорды",
         rulesGoal: "🎯 Цель: открыть все ячейки без мин как можно быстрее!"
     },
     en: {
         title: "Minesweeper",
         rulesTitle: "📋 Minesweeper Rules",
         leaderboardTitle: "World Records",
+        recordsTitle: "🏆 World Records",
         optEasy: "Easy", optMedium: "Medium", optHard: "Hard",
-        newGame: "New Game", rules: "Rules", settings: "Settings",
+        newGame: "New Game", rules: "Rules", settings: "Settings", records: "Records",
         language: "Language", sound: "Sound", close: "Close", refresh: "Refresh",
         back: "Back to game", sec: "s", volume: "Volume",
         winMsg: "🏆 Won in", loseMsg: "💥 Game Over!",
-        noRecords: "No records yet",
-        mobileFlag: "Flag", mobileOpen: "Open",
+        noRecords: "No records yet", loading: "Loading...",
+        mobileFlag: "Flag", mobileUnflag: "Remove flag", mobileOpen: "Open",
         authRequired: "Sign in to Yandex to participate in the leaderboard",
-        yourPlace: "You are at",
-        place: "place",
-        loading: "Loading...",
+        yourPlace: "You are at", place: "place",
         rule1: "🖱️ <strong>Left click</strong> — reveal cell",
         rule2: "🚩 <strong>Right click</strong> — place/remove flag",
-        rule3: "📱 <strong>On mobile:</strong> 1st tap selects, 2nd tap opens",
+        rule3: "📱 <strong>On mobile:</strong> select cell, then use buttons",
         rule4: "🔢 Number shows mines around",
         rule5: "💥 Hitting a mine = game over",
         rule6: "🏆 Reveal all safe cells to win",
         rule7: "🛡️ First click is always safe",
-        rule8: "🔐 <strong>Sign in to Yandex</strong> to save records to the leaderboard",
+        rule8: "🚫 Can't open flagged cell — remove flag first",
+        rule9: "🔐 <strong>Sign in to Yandex</strong> to save records",
         rulesGoal: "🎯 Goal: reveal all safe cells as fast as possible!"
     }
 };
@@ -68,13 +68,10 @@ function applyTranslations(lang) {
 }
 window.applyTranslations = applyTranslations;
 
-// Регистрация callback для уведомления о готовности SDK
 window.onSDKReady = function(callback) {
     if (ysdk && typeof isAuthorized !== 'undefined') {
-        // SDK уже готов, вызываем сразу
         callback(isAuthorized);
     } else {
-        // SDK еще не готов, добавляем в очередь
         sdkReadyCallbacks.push(callback);
     }
 };
@@ -85,14 +82,12 @@ async function initSDK() {
         console.log('SDK готов');
         window.ysdk = ysdk;
 
-        // Проверка авторизации
         try {
             const player = await ysdk.player.getData();
             isAuthorized = !!(player && player.uid);
             console.log('Авторизация:', isAuthorized ? 'Да' : 'Нет');
         } catch (e) {
             isAuthorized = false;
-            console.log('Не удалось проверить авторизацию:', e);
         }
 
         const savedLang = localStorage.getItem('saper_lang');
@@ -117,7 +112,6 @@ async function initSDK() {
             console.log('Лидерборды недоступны:', e);
         }
 
-        // Уведомляем всех подписчиков о готовности SDK
         sdkReadyCallbacks.forEach(callback => callback(isAuthorized));
         sdkReadyCallbacks = [];
 
@@ -144,8 +138,6 @@ async function initSDK() {
         console.log('SDK не загрузился:', err);
         isAuthorized = false;
         applyTranslations('ru');
-        
-        // Уведомляем даже при ошибке
         sdkReadyCallbacks.forEach(callback => callback(false));
         sdkReadyCallbacks = [];
     }
@@ -171,14 +163,10 @@ function savePlayerName(name) {
 }
 
 window.setLeaderboardScore = async function(leaderboardName, score) {
-    if (!isAuthorized) {
-        console.log('Игрок не авторизован, рекорд не сохранён');
-        return false;
-    }
+    if (!isAuthorized) return false;
     if (lb) {
         try {
             await lb.setLeaderboardScore(leaderboardName, score);
-            console.log(`Рекорд ${score} отправлен в ${leaderboardName}`);
             return true;
         } catch (e) { 
             console.error('Ошибка отправки рекорда:', e);
@@ -192,8 +180,7 @@ window.getLeaderboardScores = async function(leaderboardName) {
     if (lb) {
         try {
             const data = await lb.getLeaderboardEntries(leaderboardName, { 
-                quantityTop: 10,
-                quantityAround: 0 
+                quantityTop: 10, quantityAround: 0 
             });
             return data.entries.map((e, index) => ({
                 place: index + 1,
@@ -201,7 +188,6 @@ window.getLeaderboardScores = async function(leaderboardName) {
                 score: e.score
             }));
         } catch (e) { 
-            console.error('Ошибка получения рекордов:', e);
             return []; 
         }
     }
@@ -209,25 +195,16 @@ window.getLeaderboardScores = async function(leaderboardName) {
 };
 
 window.getLeaderboardPlayerEntry = async function(leaderboardName) {
-    if (!isAuthorized || !lb) {
-        return null;
-    }
+    if (!isAuthorized || !lb) return null;
     try {
         const entry = await lb.getLeaderboardPlayerEntry(leaderboardName);
-        return {
-            place: entry.rank,
-            score: entry.score
-        };
+        return { place: entry.rank, score: entry.score };
     } catch (e) {
-        console.log('Игрок ещё не в рейтинге:', e);
         return null;
     }
 };
 
-window.isPlayerAuthorized = function() {
-    return isAuthorized;
-};
-
+window.isPlayerAuthorized = function() { return isAuthorized; };
 window.getCurrentLang = () => currentLang;
 window.getTranslation = (key) => translations[currentLang][key] || translations.ru[key];
 
