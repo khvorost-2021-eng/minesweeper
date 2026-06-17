@@ -155,7 +155,7 @@ function playWinSound() {
 function changeDifficulty() {
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     const d = difficultySelect.value;
-    canvas.classList.remove('square');
+    canvas.classList.remove('square', 'rectangle');
     if (d === '1') {
         scale = 9; ro = 9; mines = 10;
         canvas.width = 300; canvas.height = 300;
@@ -708,7 +708,7 @@ if (mobileMoreBtn) {
 if (menuRecordsBtn) {
     menuRecordsBtn.addEventListener('click', async () => {
         additionalMenu.style.display = 'none';
-        recordsContainer.style.display = 'flex';
+        if (recordsContainer) recordsContainer.style.display = 'flex';
         currentRecordsTab = currentLeaderboardName;
         updateRecordsTabs();
         await loadMobileRecords();
@@ -717,7 +717,7 @@ if (menuRecordsBtn) {
 if (menuRulesBtn) {
     menuRulesBtn.addEventListener('click', () => {
         additionalMenu.style.display = 'none';
-        rulesContainer.style.display = 'flex';
+        if (rulesContainer) rulesContainer.style.display = 'flex';
     });
 }
 if (menuSettingsBtn) {
@@ -845,6 +845,7 @@ function updateAllTexts() {
     document.getElementById('recordsDiffMedium').textContent = t('optMedium');
     document.getElementById('recordsDiffHard').textContent = t('optHard');
 
+    // Перевод настроек
     const settingsTitle = document.getElementById('settingsTitle');
     if (settingsTitle) settingsTitle.textContent = '⚙️ ' + t('settings');
     const langLabel = document.getElementById('langLabel');
