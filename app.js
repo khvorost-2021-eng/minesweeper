@@ -453,13 +453,17 @@ function getCellFromCoords(cx, cy) {
         row: Math.floor((cy - rect.top) * (canvas.height / rect.height) / CELL_SIZE)
     };
 }
+// 🖱️ ПК обработка
 function handleCanvasClick(e) {
     if (win || gameOver || isPaused) return;
     e.preventDefault();
     const { row, col } = getCellFromCoords(e.clientX, e.clientY);
     if (row < 0 || row >= ro || col < 0 || col >= scale) return;
     if (revealed[row][col]) return;
+    
     if (e.button === 2) {
+        // ❌ Нельзя ставить флажок до первого клика
+        if (firstClick) return;
         playFlagSound(!flagged[row][col]);
         toggleFlag(row, col);
     } else {
@@ -478,6 +482,7 @@ function handleCanvasClick(e) {
 }
 canvas.addEventListener('click', handleCanvasClick);
 canvas.addEventListener('contextmenu', (e) => { e.preventDefault(); handleCanvasClick(e); });
+// 📱 Мобильная обработка
 canvas.addEventListener('touchstart', (e) => {
     if (win || gameOver || isPaused) return;
     e.preventDefault();
@@ -514,6 +519,8 @@ function openSelectedCell() {
 }
 function flagSelectedCell() {
     if (!selectedCell || win || gameOver) return;
+    // ❌ Нельзя ставить флажок до первого клика
+    if (firstClick) return;
     const { row, col } = selectedCell;
     if (revealed[row][col]) { selectedCell = null; updateMobileButtons(); draw(); return; }
     playFlagSound(!flagged[row][col]);
@@ -525,10 +532,13 @@ function updateMobileButtons() {
     const t = window.getTranslation || ((k) => k);
     const hasSelection = selectedCell && !revealed[selectedCell.row][selectedCell.col];
     const isFlagged = hasSelection && flagged[selectedCell.row][selectedCell.col];
-    mobileFlagBtn.disabled = !hasSelection || win || gameOver;
+    
+    // ❌ Кнопка флажка отключена до первого клика
+    mobileFlagBtn.disabled = !hasSelection || win || gameOver || firstClick;
     mobileOpenBtn.disabled = !hasSelection || win || gameOver || isFlagged;
     mobileOpenBtn.classList.toggle('active-pulse', hasSelection && !win && !gameOver && !isFlagged);
-    mobileFlagBtn.classList.toggle('active-pulse', hasSelection && !win && !gameOver);
+    mobileFlagBtn.classList.toggle('active-pulse', hasSelection && !win && !gameOver && !firstClick);
+    
     if (isFlagged) {
         mobileFlagBtn.textContent = '❌ ' + (t('mobileUnflag') || 'Снять флажок');
     } else {
@@ -658,18 +668,15 @@ function newGame() {
 getRecord();
 newGame();
 
-// === ДЕСКТОПНЫЕ кнопки ===
 newGameBtn.addEventListener('click', newGame);
 rulesBtn.addEventListener('click', () => { rulesContainer.style.display = 'flex'; });
 
-// === МОБИЛЬНЫЕ кнопки ===
 const mobileNewGameBtn = document.getElementById('mobileNewGameBtn');
 const mobileRecordsBtn = document.getElementById('mobileRecordsBtn');
 const mobileMoreBtn = document.getElementById('mobileMoreBtn');
 
 if (mobileNewGameBtn) mobileNewGameBtn.addEventListener('click', newGame);
 
-// Кнопка Рекорды — просто открывает экран рекордов
 if (mobileRecordsBtn) {
     mobileRecordsBtn.addEventListener('click', async () => {
         currentRecordsTab = currentLeaderboardName;
@@ -679,7 +686,6 @@ if (mobileRecordsBtn) {
     });
 }
 
-// === Меню "Дополнительно" ===
 const additionalMenu = document.getElementById('additionalMenu');
 const menuRulesBtn = document.getElementById('menuRulesBtn');
 const menuSettingsBtn = document.getElementById('menuSettingsBtn');
@@ -713,7 +719,6 @@ if (menuBackBtn) {
     });
 }
 
-// === Кнопки закрытия оверлеев ===
 backToGameBtn.addEventListener('click', () => {
     rulesContainer.style.display = 'none';
 });
@@ -733,7 +738,6 @@ document.querySelectorAll('.records-diff-btn').forEach(btn => {
 
 document.getElementById('refreshBtn').addEventListener('click', getRecord);
 
-// === НАСТРОЙКИ ===
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.createElement('div');
 settingsModal.id = 'settingsModal';
@@ -782,17 +786,14 @@ document.getElementById('volumeSlider').addEventListener('change', (e) => {
 function updateAllTexts() {
     const t = window.getTranslation || ((k) => k);
     
-    // Десктопные кнопки
     newGameBtn.textContent = '🔄 ' + t('newGame');
     rulesBtn.textContent = '📋 ' + t('rules');
     if (settingsBtn) settingsBtn.textContent = '⚙️ ' + t('settings');
     
-    // Мобильные кнопки
     if (mobileNewGameBtn) mobileNewGameBtn.textContent = '🔄 ' + t('newGame');
     if (mobileRecordsBtn) mobileRecordsBtn.textContent = '🏆 ' + t('records');
     if (mobileMoreBtn) mobileMoreBtn.textContent = '➕ ' + (t('more') || 'Дополнительно');
 
-    // Меню Дополнительно
     const additionalMenuTitle = document.getElementById('additionalMenuTitle');
     if (additionalMenuTitle) additionalMenuTitle.textContent = '➕ ' + (t('more') || 'Дополнительно');
     if (menuRulesBtn) menuRulesBtn.textContent = '📋 ' + t('rules');
