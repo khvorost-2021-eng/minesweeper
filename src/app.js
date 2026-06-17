@@ -4,7 +4,7 @@ const newGameBtn = document.getElementById('newGameBtn');
 const rulesBtn = document.getElementById('rulesBtn');
 const rulesContainer = document.getElementById('rulesContainer');
 const backToGameBtn = document.getElementById('backToGameBtn');
-const recordsBtn = document.getElementById('recordsBtn');
+const recordsBtn = document.getElementById('mobileRecordsBtn');
 const recordsContainer = document.getElementById('recordsContainer');
 const backFromRecordsBtn = document.getElementById('backFromRecordsBtn');
 const mobileLeaderboardList = document.getElementById('mobileLeaderboardList');
@@ -16,6 +16,8 @@ const minesCounter = document.getElementById('minesCounter');
 const mobileFlagBtn = document.getElementById('mobileFlagBtn');
 const mobileOpenBtn = document.getElementById('mobileOpenBtn');
 
+// 🔊 Звуки
+const bgMusic = document.getElementById('bgMusic');
 const revealSound = document.getElementById('revealSound');
 const loseSound = document.getElementById('loseSound');
 const winSound = document.getElementById('winSound');
@@ -47,15 +49,19 @@ let currentRecordsTab = 'sapermedium';
 let soundEnabled = localStorage.getItem('saper_sound') !== 'false';
 let masterVolume = parseFloat(localStorage.getItem('saper_volume')) || 0.8;
 let sdkInitialized = false;
+let musicStarted = false;
 
+// Блокировка скролла
 document.addEventListener('wheel', (e) => e.preventDefault(), { passive: false });
 document.addEventListener('touchmove', (e) => {
     const scrollable = ['.leaderboard-list', '.rules-content', '.records-content', '.settings-modal-content'];
     if (!scrollable.some(sel => e.target.closest(sel))) e.preventDefault();
 }, { passive: false });
 
+// Пауза при уходе со страницы
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
+        if (bgMusic && !bgMusic.paused) bgMusic.pause();
         if (timerInterval !== null && !gameOver && !win && !firstClick) {
             elapsedBeforePause += (Date.now() - timerTime) / 1000;
             clearInterval(timerInterval);
@@ -63,6 +69,9 @@ document.addEventListener('visibilitychange', () => {
             isPaused = true;
         }
     } else {
+        if (bgMusic && musicStarted && !gameOver && !win && !firstClick) {
+            bgMusic.play().catch(() => {});
+        }
         if (isPaused && !gameOver && !win && !firstClick) {
             timerTime = Date.now();
             timerInterval = setInterval(timerTick, 10);
@@ -71,6 +80,7 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
+// 🔊 Функции звуков
 function playSound(sound, vol = 1.0) {
     if (!soundEnabled || !sound) return;
     try {
@@ -163,6 +173,16 @@ function changeDifficulty() {
 difficultySelect.value = '2';
 changeDifficulty();
 difficultySelect.addEventListener('change', changeDifficulty);
+
+// 📱 Обработчики мобильных кнопок сложности
+document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        difficultySelect.value = btn.dataset.diff;
+        changeDifficulty();
+    });
+});
 
 function initRevealed() {
     for (let r = 0; r < ro; r++) {
@@ -432,7 +452,7 @@ function getCellFromCoords(cx, cy) {
     };
 }
 
-// === 🖱️ ОБРАБОТКА КЛИКОВ (ПК) ===
+// 🖱️ ПК обработка
 function handleCanvasClick(e) {
     if (win || gameOver || isPaused) return;
     e.preventDefault();
@@ -441,18 +461,20 @@ function handleCanvasClick(e) {
     if (revealed[row][col]) return;
 
     if (e.button === 2) {
-        // Правый клик — ставим/снимаем флажок
         playFlagSound(!flagged[row][col]);
         toggleFlag(row, col);
     } else {
-        // 🛡️ ЗАЩИТА: левый клик на клетку с флажком заблокирован
         if (flagged[row][col]) return;
-        
         if (firstClick) {
             placeMines(row, col);
             firstClick = false;
             calculateAllNumbers();
             timerStarts();
+            if (!musicStarted && bgMusic) {
+                bgMusic.volume = 0.4 * masterVolume;
+                bgMusic.play().catch(() => {});
+                musicStarted = true;
+            }
         }
         if (board[row][col] === 0) floodFill(row, col, true);
         else revealCell(row, col);
@@ -464,7 +486,7 @@ function handleCanvasClick(e) {
 canvas.addEventListener('click', handleCanvasClick);
 canvas.addEventListener('contextmenu', (e) => { e.preventDefault(); handleCanvasClick(e); });
 
-// === 📱 МОБИЛЬНАЯ ВЕРСИЯ ===
+// 📱 Мобильная обработка
 canvas.addEventListener('touchstart', (e) => {
     if (win || gameOver || isPaused) return;
     e.preventDefault();
@@ -475,7 +497,6 @@ canvas.addEventListener('touchstart', (e) => {
     if (!selectedCell) {
         selectedCell = { row, col };
     } else if (selectedCell.row === row && selectedCell.col === col) {
-        // Второй тап по той же клетке — пытаемся открыть (если без флажка)
         if (!flagged[row][col]) {
             openSelectedCell();
             return;
@@ -490,15 +511,17 @@ function openSelectedCell() {
     if (!selectedCell || win || gameOver) return;
     const { row, col } = selectedCell;
     if (revealed[row][col]) { selectedCell = null; updateMobileButtons(); draw(); return; }
-    
-    // 🛡️ ЗАЩИТА: нельзя открыть клетку с флажком — сначала снять
     if (flagged[row][col]) return;
-    
     if (firstClick) {
         placeMines(row, col);
         firstClick = false;
         calculateAllNumbers();
         timerStarts();
+        if (!musicStarted && bgMusic) {
+            bgMusic.volume = 0.4 * masterVolume;
+            bgMusic.play().catch(() => {});
+            musicStarted = true;
+        }
     }
     if (board[row][col] === 0) floodFill(row, col, true);
     else revealCell(row, col);
@@ -510,31 +533,22 @@ function flagSelectedCell() {
     if (!selectedCell || win || gameOver) return;
     const { row, col } = selectedCell;
     if (revealed[row][col]) { selectedCell = null; updateMobileButtons(); draw(); return; }
-    
-    // Ставим или снимаем флажок (в зависимости от текущего состояния)
     playFlagSound(!flagged[row][col]);
     toggleFlag(row, col);
     updateMobileButtons(); draw();
 }
 
-// === 🚩 ОБНОВЛЁННАЯ ЛОГИКА МОБИЛЬНЫХ КНОПОК ===
 function updateMobileButtons() {
     if (!mobileFlagBtn || !mobileOpenBtn) return;
     const t = window.getTranslation || ((k) => k);
-    
     const hasSelection = selectedCell && !revealed[selectedCell.row][selectedCell.col];
     const isFlagged = hasSelection && flagged[selectedCell.row][selectedCell.col];
     
-    // Кнопка флажка активна, если есть выделение
     mobileFlagBtn.disabled = !hasSelection || win || gameOver;
-    
-    // 🛡️ Кнопка "Открыть" ЗАБЛОКИРОВАНА, если на клетке стоит флажок
     mobileOpenBtn.disabled = !hasSelection || win || gameOver || isFlagged;
-    
     mobileOpenBtn.classList.toggle('active-pulse', hasSelection && !win && !gameOver && !isFlagged);
     mobileFlagBtn.classList.toggle('active-pulse', hasSelection && !win && !gameOver);
     
-    // 🔄 Меняем текст кнопки в зависимости от состояния флажка
     if (isFlagged) {
         mobileFlagBtn.textContent = '❌ ' + (t('mobileUnflag') || 'Снять флажок');
     } else {
@@ -621,7 +635,6 @@ if (recordsBtn) {
     recordsBtn.addEventListener('click', async () => {
         recordsContainer.style.display = 'flex';
         currentRecordsTab = currentLeaderboardName;
-        updateRecordsTabs();
         await loadMobileRecords();
     });
 }
@@ -629,20 +642,6 @@ if (recordsBtn) {
 if (backFromRecordsBtn) {
     backFromRecordsBtn.addEventListener('click', () => {
         recordsContainer.style.display = 'none';
-    });
-}
-
-document.querySelectorAll('.records-tab').forEach(tab => {
-    tab.addEventListener('click', async () => {
-        currentRecordsTab = tab.dataset.lb;
-        updateRecordsTabs();
-        await loadMobileRecords();
-    });
-});
-
-function updateRecordsTabs() {
-    document.querySelectorAll('.records-tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.lb === currentRecordsTab);
     });
 }
 
@@ -852,9 +851,9 @@ function updateAllTexts() {
     document.getElementById('optMedium').textContent = t('optMedium');
     document.getElementById('optHard').textContent = t('optHard');
     
-    document.getElementById('tabEasy').textContent = t('optEasy');
-    document.getElementById('tabMedium').textContent = t('optMedium');
-    document.getElementById('tabHard').textContent = t('optHard');
+    document.getElementById('diffEasy').textContent = t('optEasy');
+    document.getElementById('diffMedium').textContent = t('optMedium');
+    document.getElementById('diffHard').textContent = t('optHard');
     
     const settingsTitle = document.getElementById('settingsTitle');
     if (settingsTitle) settingsTitle.textContent = '⚙️ ' + t('settings');

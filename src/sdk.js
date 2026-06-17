@@ -8,7 +8,7 @@ const translations = {
     ru: {
         title: "Сапёр",
         rulesTitle: "📋 Правила игры «Сапёр»",
-        leaderboardTitle: "Мировые рекорды",
+        leaderboardTitle: "🏆 Мировые рекорды",
         recordsTitle: "🏆 Мировые рекорды",
         optEasy: "Лёгкий", optMedium: "Средний", optHard: "Сложный",
         newGame: "Новая игра", rules: "Правила", settings: "Настройки", records: "Рекорды",
@@ -33,7 +33,7 @@ const translations = {
     en: {
         title: "Minesweeper",
         rulesTitle: "📋 Minesweeper Rules",
-        leaderboardTitle: "World Records",
+        leaderboardTitle: "🏆 World Records",
         recordsTitle: "🏆 World Records",
         optEasy: "Easy", optMedium: "Medium", optHard: "Hard",
         newGame: "New Game", rules: "Rules", settings: "Settings", records: "Records",

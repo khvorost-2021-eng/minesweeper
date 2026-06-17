@@ -6,7 +6,8 @@
     <title>Сапёр</title>
     <link rel="stylesheet" href="style.css">
     
-    <!-- Звуки игры (скрыты от системного плеера) -->
+    <!-- 🔊 Звуки игры (скрыты от системного плеера) -->
+    <audio id="bgMusic" src="music/bg.mp3" loop style="display: none !important;"></audio>
     <audio id="revealSound" src="music/click.mp3" style="display: none !important;"></audio>
     <audio id="loseSound" src="music/lose.mp3" style="display: none !important;"></audio>
     <audio id="winSound" src="music/win.mp3" style="display: none !important;"></audio>
@@ -18,7 +19,6 @@
         <h1 id="gameTitle">💣 Сапёр</h1>
         
         <div class="game-layout">
-            <!-- ИГРОВАЯ ОБЛАСТЬ -->
             <div class="game-area">
                 <div class="score-panel">
                     <span>🚩 <span id="minesCounter">40</span></span>
@@ -26,36 +26,42 @@
                 </div>
                 
                 <div id="difficultyPage">
-                    <select id="difficultySelect">
+                    <!-- Десктопный select -->
+                    <select id="difficultySelect" class="desktop-only">
                         <option value="1" id="optEasy">Лёгкий</option>
                         <option value="2" id="optMedium" selected>Средний</option>
                         <option value="3" id="optHard">Сложный</option>
                     </select>
+                    <!-- Мобильные кнопки сложности -->
+                    <div class="mobile-difficulty-buttons">
+                        <button class="diff-btn" data-diff="1" id="diffEasy">Лёгкий</button>
+                        <button class="diff-btn active" data-diff="2" id="diffMedium">Средний</button>
+                        <button class="diff-btn" data-diff="3" id="diffHard">Сложный</button>
+                    </div>
                 </div>
 
                 <canvas id="gameCanvas"></canvas>
 
-                <!-- Мобильные кнопки управления -->
+                <!-- 📱 Мобильные кнопки управления -->
                 <div class="mobile-controls">
                     <button id="mobileFlagBtn" class="mobile-btn flag-btn">🚩 Флажок</button>
                     <button id="mobileOpenBtn" class="mobile-btn open-btn">✓ Открыть</button>
                 </div>
 
-                <!-- Кнопки управления -->
                 <div class="controls">
                     <button id="newGameBtn" class="game-btn">🔄 Новая игра</button>
                     <button id="rulesBtn" class="game-btn">📋 Правила</button>
                     <button id="settingsBtn" class="game-btn settings-btn">⚙️ Настройки</button>
-                    <!-- Кнопка рекордов (только для мобильных, скрыта на ПК) -->
-                    <button id="recordsBtn" class="game-btn records-btn">🏆 Рекорды</button>
+                    <!-- Кнопка рекордов (видна только на мобильных) -->
+                    <button id="mobileRecordsBtn" class="game-btn mobile-only-btn">🏆 Рекорды</button>
                 </div>
                 
                 <p id="message"></p>
             </div>
 
-            <!-- САЙДБАР (скрывается на мобильных) -->
+            <!-- Десктопный сайдбар лидерборда -->
             <div class="leaderboard-area">
-                <div class="leaderboard-title" id="leaderboardTitle">Мировые рекорды</div>
+                <div class="leaderboard-title" id="leaderboardTitle">🏆 Мировые рекорды</div>
                 <ul id="leaderboardList" class="leaderboard-list">
                     <li class="empty-message">Загрузка...</li>
                 </ul>
@@ -65,44 +71,48 @@
 
         <!-- Оверлей правил -->
         <div id="rulesContainer" class="rules-overlay" style="display: none;">
-            <div class="rules-content">
+            <div class="rules-container">
                 <h2 id="rulesTitle">📋 Правила игры «Сапёр»</h2>
                 <ul id="rulesList">
                     <li id="rule1">🖱️ <strong>Левый клик</strong> — открыть ячейку</li>
                     <li id="rule2">🚩 <strong>Правый клик</strong> — поставить/убрать флажок</li>
-                    <li id="rule3">📱 <strong>На телефоне:</strong> 1-й тап выделяет, 2-й — открывает</li>
+                    <li id="rule3">📱 <strong>На телефоне:</strong> выделите клетку, затем используйте кнопки</li>
                     <li id="rule4">🔢 Цифра показывает количество мин вокруг</li>
                     <li id="rule5">💥 Если открыть мину — поражение</li>
                     <li id="rule6">🏆 Откройте все безопасные ячейки для победы</li>
                     <li id="rule7">🛡️ Первый клик всегда безопасный</li>
                     <li id="rule8">🚫 На клетку с флажком нельзя нажать — сначала снимите его</li>
-                    <li id="rule8">🔐 <strong>Авторизуйтесь в Яндексе</strong>, чтобы сохранять рекорды</li>
+                    <li id="rule9">🔐 <strong>Авторизуйтесь в Яндексе</strong>, чтобы сохранять рекорды</li>
                 </ul>
                 <p><em id="rulesGoal">🎯 Цель: открыть все ячейки без мин как можно быстрее!</em></p>
-                <button id="backToGameBtn" class="game-btn back-btn">
+                <button id="backToGameBtn" class="back-btn">
                     <span class="back-arrow">◀</span>
                     <span class="back-text">Назад к игре</span>
                 </button>
             </div>
         </div>
 
-        <!-- Оверлей рекордов (для мобильных) -->
+        <!-- 📱 Оверлей рекордов (для мобильных) -->
         <div id="recordsContainer" class="records-overlay" style="display: none;">
             <div class="records-content">
                 <h2 id="recordsTitle">🏆 Мировые рекорды</h2>
-                <div class="records-difficulty-tabs">
-                    <button class="records-tab" data-lb="sapereasy" id="tabEasy">Лёгкий</button>
-                    <button class="records-tab active" data-lb="sapermedium" id="tabMedium">Средний</button>
-                    <button class="records-tab" data-lb="saperhard" id="tabHard">Сложный</button>
-                </div>
                 <ul id="mobileLeaderboardList" class="leaderboard-list">
                     <li class="empty-message">Загрузка...</li>
                 </ul>
-                <button id="backFromRecordsBtn" class="game-btn back-btn">
+                <button id="backFromRecordsBtn" class="back-btn">
                     <span class="back-arrow">◀</span>
                     <span class="back-text">Назад к игре</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для имени -->
+    <div id="nameModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="modalMessage"></p>
+            <input type="text" id="playerNameInput" maxlength="15" placeholder="Ваше имя">
+            <button id="saveNameBtn">Сохранить</button>
         </div>
     </div>
 
