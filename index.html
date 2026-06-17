@@ -1,55 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Сапёр</title>
+    
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💣</text></svg>">
+    
+    <audio id="revealSound" src="music/click.mp3" style="display: none !important;"></audio>
+    <audio id="loseSound" src="music/lose.mp3" style="display: none !important;"></audio>
+    <audio id="winSound" src="music/win.mp3" style="display: none !important;"></audio>
+    
+    <script src="https://yandex.ru/games/sdk/v2"></script>
 </head>
 <body>
-    <audio id="bgMusic" loop>
-        <source src="music/bg-music.mp3" type="audio/mpeg">
-    </audio>
-    <div id="difficultyPage">
-        <select name="" id="difficultySelect">
-            <option value="1">Лёгкий</option>
-            <option value="2">Средний</option>
-            <option value="3">Сложный</option>
-        </select>
-    </div>    
     <div id="wrapper">
-        <h1>💣 Сапёр</h1>
-
+        <h1 id="gameTitle">💣 Сапёр</h1>
+        
         <div class="game-layout">
             <div class="game-area">
                 <div class="score-panel">
                     <span>🚩 <span id="minesCounter">40</span></span>
-                    <span>⏱️ <span id="timer">0.00</span></span>
+                    <span>⏱️ <span id="timer">0.00с</span></span>
                 </div>
                 
-                <canvas id="gameCanvas" width="480" height="480"></canvas>
-                
+                <div id="difficultyPage">
+                    <select id="difficultySelect">
+                        <option value="1" id="optEasy">Лёгкий</option>
+                        <option value="2" id="optMedium" selected>Средний</option>
+                        <option value="3" id="optHard">Сложный</option>
+                    </select>
+                </div>
+
+                <canvas id="gameCanvas"></canvas>
+
+                <div class="mobile-controls">
+                    <button id="mobileFlagBtn" class="mobile-btn flag-btn">🚩 Флажок</button>
+                    <button id="mobileOpenBtn" class="mobile-btn open-btn">✓ Открыть</button>
+                </div>
+
                 <div class="controls">
-                    <button id="newGameBtn">🔄 Новая игра</button>
-                    <button id="rulesBtn">📋 Правила</button>
+                    <button id="newGameBtn" class="game-btn">🔄 Новая игра</button>
+                    <button id="rulesBtn" class="game-btn">📋 Правила</button>
+                    <button id="settingsBtn" class="game-btn settings-btn">⚙️ Настройки</button>
                 </div>
                 
                 <p id="message"></p>
             </div>
-            
+
             <div class="leaderboard-area">
-                <div class="leaderboard-title">
-                    <span>Мировые рекорды</span>
-                </div>
+                <div class="leaderboard-title" id="leaderboardTitle">Мировые рекорды</div>
                 <ul id="leaderboardList" class="leaderboard-list">
                     <li class="empty-message">Загрузка...</li>
                 </ul>
                 <button id="refreshBtn" class="refresh-btn">🔄 Обновить</button>
             </div>
         </div>
+
+        <div id="rulesContainer" class="rules-overlay" style="display: none;">
+            <div class="rules-content">
+                <h2 id="rulesTitle">📋 Правила игры «Сапёр»</h2>
+                <ul id="rulesList">
+                    <li id="rule1">🖱️ <strong>Левый клик</strong> — открыть ячейку</li>
+                    <li id="rule2">🚩 <strong>Правый клик</strong> — поставить/убрать флажок</li>
+                    <li id="rule3">📱 <strong>На телефоне:</strong> 1-й тап выделяет клетку, 2-й — открывает</li>
+                    <li id="rule4">🔢 Цифра показывает количество мин вокруг</li>
+                    <li id="rule5">💥 Если открыть мину — поражение</li>
+                    <li id="rule6">🏆 Откройте все безопасные ячейки для победы</li>
+                    <li id="rule7">🛡️ Первый клик всегда безопасный</li>
+                    <li id="rule8">🔐 <strong>Авторизуйтесь в Яндексе</strong>, чтобы сохранять рекорды в таблицу лидеров</li>
+                </ul>
+                <p><em id="rulesGoal">🎯 Цель: открыть все ячейки без мин как можно быстрее!</em></p>
+                <button id="backToGameBtn" class="game-btn back-btn">
+                    <span class="back-arrow">◀</span>
+                    <span class="back-text">Назад к игре</span>
+                </button>
+            </div>
+        </div>
     </div>
-    
-    <script src="app.js"></script>
+
+    <div id="nameModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="modalMessage">Вы попали в топ-5! Введите ваше имя:</p>
+            <input type="text" id="playerNameInput" maxlength="15" placeholder="Ваше имя">
+            <button id="saveNameBtn">Сохранить</button>
+        </div>
+    </div>
+
+    <script src="src/sdk.js"></script>
+    <script src="src/app.js"></script>
 </body>
 </html>
