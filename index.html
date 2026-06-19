@@ -2,14 +2,19 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Сапёр</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>💣 Сапёр: Классика</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://yandex.ru/games/sdk/v2" defer></script>
+    <script src="https://yandex.ru/games/sdk/v2"></script>
 </head>
 <body>
+    <!-- Прелоадер БЕЗ текста — только спиннер -->
+    <div id="preloader" class="preloader">
+        <div class="spinner"></div>
+    </div>
+
     <div id="wrapper">
-        <h1 id="gameTitle">💣 Сапёр</h1>
+        <h1 id="gameTitle">💣 Сапёр: Классика</h1>
         
         <div class="game-layout">
             <div class="game-area">
@@ -38,14 +43,14 @@
                     <button id="mobileOpenBtn" class="mobile-btn open-btn" disabled>✓ Открыть</button>
                 </div>
 
-                <!-- ДЕСКТОПНЫЕ кнопки (по умолчанию видны на ПК, скрыты на мобильном) -->
+                <!-- Десктопные кнопки (скрываются на мобильном) -->
                 <div class="controls">
                     <button id="newGameBtn" class="game-btn">🔄 Новая игра</button>
                     <button id="rulesBtn" class="game-btn">📋 Правила</button>
                     <button id="settingsBtn" class="game-btn settings-btn">⚙️ Настройки</button>
                 </div>
 
-                <!-- МОБИЛЬНЫЕ кнопки (по умолчанию скрыты на ПК, видны на мобильном) -->
+                <!-- Мобильные кнопки (видны только на мобильном) -->
                 <div class="mobile-only">
                     <button id="mobileNewGameBtn" class="game-btn">🔄 Новая игра</button>
                     <button id="mobileRecordsBtn" class="game-btn records-btn">🏆 Рекорды</button>
@@ -64,6 +69,7 @@
             </div>
         </div>
 
+        <!-- Оверлей Правил -->
         <div id="rulesContainer" class="rules-overlay" style="display: none;">
             <div class="rules-container">
                 <h2 id="rulesTitle">📋 Правила игры «Сапёр»</h2>
@@ -86,6 +92,7 @@
             </div>
         </div>
 
+        <!-- Оверлей Рекордов -->
         <div id="recordsContainer" class="records-overlay" style="display: none;">
             <div class="records-content">
                 <h2 id="recordsTitle">🏆 Мировые рекорды</h2>
@@ -104,6 +111,7 @@
             </div>
         </div>
 
+        <!-- Меню Дополнительно -->
         <div id="additionalMenu" class="additional-menu" style="display: none;">
             <div class="additional-menu-content">
                 <h2 id="additionalMenuTitle">➕ Дополнительно</h2>
